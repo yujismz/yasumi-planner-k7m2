@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="休日プランナー">
+<title>休日プランナー</title>
+<style>
+:root{
+  --bg:#f4f6f3; --card:#ffffff; --ink:#1f2a24; --sub:#5d6b63; --line:#dde3dc;
+  --main:#2f7d4f; --main-ink:#ffffff; --soft:#e3f1e8; --warn:#c0392b; --warn-soft:#fbe6e3;
+  --amber:#b7791f; --amber-soft:#fdf1da;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121614; --card:#1b211e; --ink:#e8eee9; --sub:#9aa9a0; --line:#2b3430;
+    --main:#4cb277; --main-ink:#0c1a12; --soft:#1f3328; --warn:#ff7b6b; --warn-soft:#3a1f1c;
+    --amber:#e3b25a; --amber-soft:#3a2e17;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.5;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+}
+header{
+  position:sticky;top:0;z-index:5;background:var(--bg);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 8px;border-bottom:1px solid var(--line);
+}
+header h1{margin:0;font-size:20px}
+#weekLabel{color:var(--sub);font-size:14px}
+main{padding:12px 16px;max-width:640px;margin:0 auto}
+section[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+h2{font-size:18px;margin:0 0 8px}
+h3{font-size:15px;margin:14px 0 6px;color:var(--sub)}
+button{font:inherit;color:inherit}
+.primary{
+  width:100%;min-height:52px;border:0;border-radius:12px;background:var(--main);color:var(--main-ink);
+  font-weight:700;font-size:17px;margin-bottom:14px
+}
+.btn{min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.btn.danger{color:var(--warn);border-color:var(--warn)}
+.btn.main{background:var(--main);color:var(--main-ink);border-color:var(--main);font-weight:700}
+.notice{background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.notice.bad{background:var(--warn-soft);color:var(--warn)}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline}
+.dayhead h2{margin:0}
+.progress{color:var(--sub);font-size:14px}
+.wx{margin:8px 0;font-size:14px}
+.wxrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 0}
+.wxrow b{min-width:3em}
+.wxrow select{margin-left:auto}
+select,input[type=text],input[type=tel],input[type=number]{
+  font:inherit;font-size:16px;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--ink);max-width:100%
+}
+.seg{display:flex;gap:6px;margin:6px 0}
+.seg button{flex:1;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.seg button.on{background:var(--main);color:var(--main-ink);border-color:var(--main);font-weight:700}
+.hint{color:var(--sub);font-size:13px;margin:2px 0 8px}
+.gauge{height:10px;border-radius:6px;background:var(--soft);overflow:hidden;margin:10px 0 4px}
+.gauge i{display:block;height:100%;background:var(--main)}
+.gauge.over i{background:var(--warn)}
+.gtext{font-size:13px;color:var(--sub)}
+.gtext.over{color:var(--warn);font-weight:700}
+ul{list-style:none;margin:10px 0 0;padding:0}
+.item{display:grid;grid-template-columns:48px 1fr;gap:4px 10px;padding:10px 0;border-top:1px solid var(--line)}
+.chk{
+  width:48px;height:48px;border-radius:12px;border:2px solid var(--main);background:var(--card);
+  font-size:26px;line-height:1;color:var(--main-ink)
+}
+.done .chk{background:var(--main)}
+.done .name{text-decoration:line-through;color:var(--sub)}
+.time{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums}
+.name{font-weight:700}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.tag{font-size:12px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--ink)}
+.tag.hard{background:var(--amber-soft);color:var(--amber)}
+.tag.warn{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.mv{grid-column:1/-1;display:flex;gap:6px}
+.mv button{flex:1;min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:14px}
+.lunch{padding:8px 0;border-top:1px dashed var(--line);color:var(--sub);font-size:13px;text-align:center}
+.empty{color:var(--sub);font-size:14px;padding:8px 0}
+/* 用事 */
+.field{display:block;margin:10px 0}
+.field span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+.field input[type=text],.field select{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checkline{display:flex;align-items:center;gap:10px;min-height:44px}
+.checkline input{width:24px;height:24px}
+.btnrow{display:flex;gap:8px;margin-top:10px}
+.btnrow .btn{flex:1}
+.trow{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.trow.off .tname{color:var(--sub);text-decoration:line-through}
+.sw{width:48px;height:48px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-size:13px}
+.sw.on{background:var(--main);border-color:var(--main);color:var(--main-ink);font-weight:700}
+.tbody{background:none;border:0;text-align:left;padding:0;min-height:44px}
+.tname{font-weight:700}
+.tmeta{font-size:13px;color:var(--sub)}
+.place{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.place:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.zip{display:flex;gap:8px}
+.zip input{flex:1;min-width:0}
+.result{font-size:13px;margin-top:4px}
+.ok{color:var(--main)} .ng{color:var(--warn)}
+nav{
+  position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);z-index:10
+}
+nav button{flex:1;min-height:60px;border:0;background:none;font-size:13px;color:var(--sub)}
+nav button b{display:block;font-size:22px;line-height:1.1}
+nav button.on{color:var(--main);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>休日プランナー</h1>
+  <div id="weekLabel"></div>
+</header>
+
+<main>
+  <!-- ① 土日 -->
+  <section id="tab-plan">
+    <div id="notice"></div>
+    <button id="gen" class="primary">時間割をつくる</button>
+    <div id="days"></div>
+    <div id="rest"></div>
+  </section>
+
+  <!-- ② 用事 -->
+  <section id="tab-tasks" hidden>
+    <form id="taskForm" class="card" autocomplete="off">
+      <h2 id="formTitle">用事を足す</h2>
+      <label class="field"><span>用事の名前</span><input type="text" name="name" placeholder="例：草刈り" required></label>
+      <div class="row2">
+        <label class="field"><span>かかる時間</span>
+          <select name="min">
+            <option value="15">15分</option><option value="30">30分</option><option value="45">45分</option>
+            <option value="60" selected>1時間</option><option value="90">1時間30分</option>
+            <option value="120">2時間</option><option value="150">2時間30分</option>
+            <option value="180">3時間</option><option value="240">4時間</option>
+          </select></label>
+        <label class="field"><span>きつさ</span>
+          <select name="hard"><option value="重">重い</option><option value="普" selected>ふつう</option><option value="軽">軽い</option></select></label>
+      </div>
+      <div class="row2">
+        <label class="field"><span>種類</span>
+          <select name="cat"><option>家庭</option><option>自治会</option><option>会社</option><option>AI学習</option><option>農作業</option><option>その他</option></select></label>
+        <label class="field"><span>場所（天気に関係）</span>
+          <select name="place"><option value="in">室内</option><option value="home">自宅の外</option><option value="farm">農地</option></select></label>
+      </div>
+      <label class="checkline"><input type="checkbox" name="want"><span>やりたいこと（日曜の夕方に回さない）</span></label>
+      <div class="btnrow">
+        <button type="submit" class="btn main" id="saveBtn">足す</button>
+        <button type="button" class="btn" id="cancelBtn" hidden>やめる</button>
+        <button type="button" class="btn danger" id="delBtn" hidden>削除</button>
+      </div>
+    </form>
+    <div class="card">
+      <h2>用事の一覧</h2>
+      <div class="hint">左の「入れる」で、今週の時間割に入れるかを切りかえます。名前を押すと直せます。</div>
+      <div id="taskList"></div>
+    </div>
+  </section>
+
+  <!-- ③ 設定 -->
+  <section id="tab-set" hidden>
+    <div class="card">
+      <h2>天気の場所</h2>
+      <div class="hint">郵便番号を入れて「調べる」を押します。一度入れれば覚えておきます。</div>
+      <div class="place">
+        <b>自宅</b>
+        <div class="zip"><input type="tel" inputmode="numeric" id="zip-home" placeholder="例：400-0031"><button class="btn" data-lookup="home">調べる</button></div>
+        <div class="result" id="res-home"></div>
+      </div>
+      <div class="place">
+        <b>農作業の場所</b>
+        <div class="zip"><input type="tel" inputmode="numeric" id="zip-farm" placeholder="例：400-0031"><button class="btn" data-lookup="farm">調べる</button></div>
+        <div class="result" id="res-farm"></div>
+      </div>
+      <div class="btnrow"><button class="btn" id="wxRefresh">天気を取りなおす</button></div>
+      <div class="result" id="wxStatus"></div>
+    </div>
+    <div class="card">
+      <h2>1日に使える時間</h2>
+      <div class="hint">「元気」の日の目安です。「ふつう」は8割、「疲れ気味」は6割で計算します。休憩10分は用事ごとに自動で入ります。</div>
+      <div class="row2">
+        <label class="field"><span>土曜</span><select id="h-sat"></select></label>
+        <label class="field"><span>日曜</span><select id="h-sun"></select></label>
+      </div>
+      <label class="field"><span>はじめる時刻</span><select id="start"></select></label>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-tab="plan" class="on"><b>📅</b>土日</button>
+  <button data-tab="tasks"><b>📝</b>用事</button>
+  <button data-tab="set"><b>⚙️</b>設定</button>
+</nav>
+
+<script>
+(function(){
+'use strict';
+const KEY='holidayPlanner.v1';
+const FACTOR={'元気':1,'ふつう':.8,'疲れ気味':.6};
+const HARDRANK={'重':3,'普':2,'軽':1};
+const HARDNAME={'重':'重い','普':'ふつう','軽':'軽い'};
+const PLACENAME={in:'室内',home:'自宅の外',farm:'農地'};
+const DAYNAME={sat:'土曜',sun:'日曜'};
+const WXICON={'晴れ':'☀️','くもり':'☁️','雨':'☔'};
+const BREAK=10;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const hm=m=>pad(Math.floor(m/60))+':'+pad(m%60);
+const jm=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?`${h}時間${r}分`:`${h}時間`):`${r}分`};
+
+/* ---------- データ ---------- */
+function defaults(){
+  return {
+    tasks:[
+      {id:'s1',name:'掃除・洗濯のまとめ',min:60,cat:'家庭',hard:'普',place:'in',want:false,on:true},
+      {id:'s2',name:'買い出し',min:60,cat:'家庭',hard:'軽',place:'in',want:false,on:true},
+      {id:'s3',name:'自治会イベントの準備',min:90,cat:'自治会',hard:'普',place:'in',want:false,on:true},
+      {id:'s4',name:'会社の仕事の残り',min:90,cat:'会社',hard:'普',place:'in',want:false,on:true},
+      {id:'s5',name:'AIの勉強',min:90,cat:'AI学習',hard:'軽',place:'in',want:true,on:true},
+      {id:'s6',name:'草刈り',min:120,cat:'農作業',hard:'重',place:'farm',want:false,on:true},
+      {id:'s7',name:'畑の見回り・水やり',min:30,cat:'農作業',hard:'軽',place:'farm',want:false,on:true}
+    ],
+    settings:{
+      places:{home:{zip:'',label:'',lat:null,lon:null},farm:{zip:'',label:'',lat:null,lon:null}},
+      hours:{sat:8,sun:6}, start:480
+    },
+    week:'', genki:{sat:'ふつう',sun:'ふつう'},
+    ov:{sat:{home:'',farm:''},sun:{home:'',farm:''}},
+    plan:null, done:{}, wx:{home:null,farm:null}, wxAt:0
+  };
+}
+function load(){
+  const d=defaults();
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return d;
+    const o=JSON.parse(raw);
+    const s=Object.assign(d,o);
+    s.settings=Object.assign(d.settings,o.settings||{});
+    s.settings.places=Object.assign(defaults().settings.places,(o.settings||{}).places||{});
+    s.settings.hours=Object.assign({sat:8,sun:6},(o.settings||{}).hours||{});
+    return s;
+  }catch(e){return d;}
+}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const T=id=>S.tasks.find(t=>t.id===id);
+const uid=()=>'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+/* ---------- 日付 ---------- */
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function addDays(s,n){const [y,m,d]=s.split('-').map(Number);return iso(new Date(y,m-1,d+n));}
+function thisSaturday(){
+  const t=new Date(),dow=t.getDay();
+  const off=dow===0?-1:6-dow;
+  return iso(new Date(t.getFullYear(),t.getMonth(),t.getDate()+off));
+}
+function rollWeek(){
+  const sat=thisSaturday();
+  if(S.week!==sat){
+    S.week=sat; S.genki={sat:'ふつう',sun:'ふつう'};
+    S.ov={sat:{home:'',farm:''},sun:{home:'',farm:''}};
+    S.plan=null; S.done={}; save();
+  }
+}
+const dateOf=d=>d==='sat'?S.week:addDays(S.week,1);
+const md=s=>{const p=s.split('-');return `${+p[1]}/${+p[2]}`;};
+
+/* ---------- 天気 ---------- */
+function kindOf(w){
+  if(w.code==null) return null;
+  if((w.prob!=null&&w.prob>=60)||w.code>=51) return '雨';
+  if(w.code>=2) return 'くもり';
+  return '晴れ';
+}
+function wxInfo(d,key){
+  const o=S.ov[d][key];
+  if(o) return {kind:o,text:'手で選んだ天気',manual:true};
+  const w=S.wx[key]&&S.wx[key][dateOf(d)];
+  if(!w) return null;
+  const k=kindOf(w); if(!k) return null;
+  return {kind:k,text:`降水${w.prob==null?'-':w.prob}%・最高${Math.round(w.tmax)}℃`};
+}
+async function fetchWx(key){
+  const p=S.settings.places[key];
+  if(!p||p.lat==null) return false;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}`+
+    `&daily=weather_code,precipitation_probability_max,temperature_2m_max&timezone=Asia%2FTokyo&past_days=1&forecast_days=10`;
+  const r=await fetch(url); if(!r.ok) throw new Error('天気の取得に失敗');
+  const j=await r.json(); const out={};
+  j.daily.time.forEach((t,i)=>{out[t]={code:j.daily.weather_code[i],prob:j.daily.precipitation_probability_max[i],tmax:j.daily.temperature_2m_max[i]};});
+  S.wx[key]=out; return true;
+}
+async function refreshWx(showStatus){
+  const st=$('wxStatus');
+  if(showStatus) {st.className='result';st.textContent='天気を取っています…';}
+  let ok=0,ng=0;
+  for(const k of ['home','farm']){
+    if(S.settings.places[k].lat==null) continue;
+    try{ if(await fetchWx(k)) ok++; }catch(e){ ng++; }
+  }
+  if(ok) {S.wxAt=Date.now(); save();}
+  if(showStatus){
+    if(ng) {st.className='result ng';st.textContent='天気を取れませんでした（通信を確認してください）。土日の画面で手で選べます。';}
+    else if(ok) {st.className='result ok';st.textContent='天気を更新しました。';}
+    else {st.className='result';st.textContent='先に郵便番号を登録してください。';}
+  }
+  renderPlan();
+}
+async function lookupZip(key){
+  const input=$('zip-'+key), res=$('res-'+key);
+  const zip=input.value.normalize('NFKC').replace(/[^0-9]/g,'');
+  if(zip.length!==7){res.className='result ng';res.textContent='郵便番号は7けたで入れてください。';return;}
+  res.className='result';res.textContent='調べています…';
+  try{
+    const r=await fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode='+zip);
+    const j=await r.json();
+    if(!j.results||!j.results.length){res.className='result ng';res.textContent='その郵便番号が見つかりません。';return;}
+    const a=j.results[0];
+    const names=[a.address2,a.address2.replace(/[市町村区]$/,''),a.address3].filter(Boolean);
+    let hit=null;
+    for(const n of names){
+      const g=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(n)+'&count=10&language=ja');
+      const gj=await g.json();
+      const list=(gj.results||[]).filter(x=>x.country_code==='JP');
+      hit=list.find(x=>x.admin1&&(x.admin1===a.address1||a.address1.indexOf(x.admin1.replace(/[県府都]$/,''))===0))||null;
+      if(hit) break;
+    }
+    if(!hit){res.className='result ng';res.textContent=`${a.address1}${a.address2} は見つかりましたが、天気の場所を決められませんでした。土日の画面で手で選べます。`;return;}
+    S.settings.places[key]={zip:zip,label:`${a.address1}${a.address2}${a.address3}`,lat:hit.latitude,lon:hit.longitude};
+    save();
+    res.className='result ok';res.textContent=`✔ ${S.settings.places[key].label}（天気は${hit.name}あたりで見ます）`;
+    await refreshWx(true);
+  }catch(e){
+    res.className='result ng';res.textContent='通信できませんでした。あとでもう一度お試しください。';
+  }
+}
+
+/* ---------- 時間割づくり ---------- */
+const cap=d=>S.settings.hours[d]*60*FACTOR[S.genki[d]];
+const load_=id=>T(id).min+BREAK;
+
+function orderDay(ids,g){
+  const B={'重':[],'普':[],'軽':[]};
+  ids.map(T).sort((a,b)=>(b.want-a.want)||(b.min-a.min)).forEach(t=>B[t.hard].push(t));
+  const pattern=g==='疲れ気味'?['普','軽','重','軽','普']:['重','軽','普','軽','重','普'];
+  const out=[];let i=0,prev=null;
+  while(out.length<ids.length){
+    const want=pattern[i++%pattern.length];
+    const order=[want].concat(['普','軽','重'].filter(x=>x!==want));
+    const h=order.find(x=>B[x].length&&!(x==='重'&&prev==='重'))||order.find(x=>B[x].length);
+    out.push(B[h].shift().id);prev=h;
+  }
+  return out;
+}
+function generate(){
+  const tasks=S.tasks.filter(t=>t.on);
+  const days=['sat','sun'],used={sat:0,sun:0},hardUsed={sat:0,sun:0},buckets={sat:[],sun:[]},rest=[];
+  const sorted=tasks.slice().sort((a,b)=>
+    ((b.place!=='in')-(a.place!=='in'))||(b.want-a.want)||(HARDRANK[b.hard]-HARDRANK[a.hard])||(b.min-a.min));
+  for(const t of sorted){
+    const load=t.min+BREAK;let best=null,bestScore=1e9;
+    for(const d of days){
+      let kind=null;
+      if(t.place!=='in'){const w=wxInfo(d,t.place);kind=w?w.kind:null;}
+      if(kind==='雨') continue;
+      if(used[d]+load>cap(d)) continue;
+      let score=(used[d]+load)/cap(d);
+      if(t.hard==='重') score+=hardUsed[d]/cap(d)*0.6;
+      if(kind==='くもり') score+=0.15;
+      if(d==='sun'&&t.want) score+=0.05;
+      if(score<bestScore){bestScore=score;best=d;}
+    }
+    if(best){buckets[best].push(t.id);used[best]+=load;if(t.hard==='重')hardUsed[best]+=load;}
+    else rest.push(t.id);
+  }
+  S.plan={sat:orderDay(buckets.sat,S.genki.sat),sun:orderDay(buckets.sun,S.genki.sun),rest:rest};
+  save();renderPlan();
+}
+function times(d){
+  const out=[];let cur=S.settings.start,lunch=false;
+  for(const id of S.plan[d]){
+    if(!lunch&&cur>=720){out.push({lunch:true,s:cur,e:cur+60});cur+=60;lunch=true;}
+    const t=T(id);out.push({id:id,s:cur,e:cur+t.min});cur+=t.min+BREAK;
+  }
+  return out;
+}
+
+/* ---------- 画面：土日 ---------- */
+function planIds(){return S.plan?S.plan.sat.concat(S.plan.sun,S.plan.rest):[];}
+function renderPlan(){
+  // 消えた用事を取り除く
+  if(S.plan){['sat','sun','rest'].forEach(k=>{S.plan[k]=S.plan[k].filter(id=>T(id));});}
+  const sat=S.week,sun=addDays(S.week,1);
+  $('weekLabel').textContent=`${md(sat)}（土）・${md(sun)}（日）の計画`;
+  let notice='';
+  if(!S.plan) notice='<div class="notice">まだ時間割がありません。元気度と天気を見てから「時間割をつくる」を押してください。</div>';
+  else{
+    const cur=S.tasks.filter(t=>t.on).map(t=>t.id).sort().join(','),old=planIds().sort().join(',');
+    if(cur!==old) notice='<div class="notice">用事が変わりました。「時間割をつくる」で反映できます。</div>';
+  }
+  $('notice').innerHTML=notice;
+  $('days').innerHTML=['sat','sun'].map(dayCard).join('');
+  const rest=S.plan?S.plan.rest:[];
+  $('rest').innerHTML=rest.length?`<div class="card"><h2>入りきらなかった用事</h2>
+    <div class="hint">雨の日に外の作業を入れない、時間があふれた、などの用事です。来週に回すか、日を選んで入れます。</div>
+    <ul>${rest.map(id=>{const t=T(id);return `<li class="item"><div></div><div class="body"><div class="name">${esc(t.name)}</div>
+      <div class="tags">${tags(t)}</div></div>
+      <div class="mv"><button data-act="toSat" data-id="${id}">土曜に入れる</button><button data-act="toSun" data-id="${id}">日曜に入れる</button></div></li>`;}).join('')}</ul></div>`:'';
+}
+function tags(t){
+  return `<span class="tag">${esc(t.cat)}</span><span class="tag ${t.hard==='重'?'hard':''}">${HARDNAME[t.hard]}</span>`+
+    (t.place!=='in'?`<span class="tag">${PLACENAME[t.place]}</span>`:'')+(t.want?'<span class="tag">★やりたい</span>':'');
+}
+function wxRow(d,key,label){
+  const w=wxInfo(d,key),ov=S.ov[d][key];
+  const txt=w?`${WXICON[w.kind]} ${w.kind}　<span class="hint">${w.text}</span>`:'<span class="hint">未取得（手で選べます）</span>';
+  return `<div class="wxrow"><b>${label}</b><span>${txt}</span>
+    <select data-ov="${d}.${key}" aria-label="${label}の天気を手で選ぶ">
+      <option value="">自動</option>${['晴れ','くもり','雨'].map(k=>`<option ${ov===k?'selected':''}>${k}</option>`).join('')}
+    </select></div>`;
+}
+function dayCard(d){
+  const date=dateOf(d),ids=S.plan?S.plan[d]:[];
+  const used=ids.reduce((s,id)=>s+load_(id),0),c=cap(d),over=used>c+0.5;
+  const doneN=ids.filter(id=>S.done[id]).length;
+  let items='';
+  if(S.plan){
+    const rows=times(d);
+    items=rows.length?'<ul>'+rows.map(r=>{
+      if(r.lunch) return `<li class="lunch">${hm(r.s)}–${hm(r.e)}　昼休み</li>`;
+      const t=T(r.id),dn=!!S.done[r.id];
+      const late=d==='sun'&&t.want&&r.e>15*60?'<span class="tag warn">⚠夕方</span>':'';
+      return `<li class="item ${dn?'done':''}">
+        <button class="chk" data-act="done" data-id="${r.id}" aria-label="完了チェック">${dn?'✓':''}</button>
+        <div class="body"><div class="time">${hm(r.s)}–${hm(r.e)}（${jm(t.min)}）</div><div class="name">${esc(t.name)}</div>
+        <div class="tags">${tags(t)}${late}</div></div>
+        <div class="mv"><button data-act="up" data-day="${d}" data-id="${r.id}">↑ 上へ</button><button data-act="down" data-day="${d}" data-id="${r.id}">↓ 下へ</button>
+        <button data-act="${d==='sat'?'toSun':'toSat'}" data-id="${r.id}">${d==='sat'?'日曜へ':'土曜へ'}</button><button data-act="later" data-id="${r.id}">あとで</button></div></li>`;
+    }).join('')+'</ul>':'<div class="empty">この日に入った用事はありません。</div>';
+  }
+  const gauge=S.plan?`<div class="gauge ${over?'over':''}"><i style="width:${Math.min(100,used/c*100)}%"></i></div>
+    <div class="gtext ${over?'over':''}">${over?'⚠ 詰め込みすぎです。1件、別の日か「あとで」にしましょう。　':''}予定 ${jm(used)} ／ 目安 ${jm(c)}（休憩つき）</div>`:'';
+  return `<div class="card"><div class="dayhead"><h2>${DAYNAME[d]} ${md(date)}</h2><span class="progress">${S.plan?`完了 ${doneN}/${ids.length}`:''}</span></div>
+    <div class="wx">${wxRow(d,'home','自宅')}${wxRow(d,'farm','農地')}</div>
+    <div class="hint" style="margin-top:6px">朝の元気度</div>
+    <div class="seg">${['元気','ふつう','疲れ気味'].map(g=>`<button data-act="genki" data-day="${d}" data-v="${g}" class="${S.genki[d]===g?'on':''}">${g}</button>`).join('')}</div>
+    ${gauge}${items}</div>`;
+}
+function onPlanClick(e){
+  const b=e.target.closest('button[data-act]');if(!b)return;
+  const act=b.dataset.act,id=b.dataset.id,d=b.dataset.day;
+  if(act==='genki'){S.genki[d]=b.dataset.v;save();renderPlan();return;}
+  if(!S.plan)return;
+  const P=S.plan;
+  const remove=()=>['sat','sun','rest'].forEach(k=>{P[k]=P[k].filter(x=>x!==id);});
+  if(act==='done'){S.done[id]=!S.done[id];}
+  else if(act==='up'||act==='down'){
+    const a=P[d],i=a.indexOf(id),j=act==='up'?i-1:i+1;
+    if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];
+  }
+  else if(act==='toSun'){remove();P.sun.push(id);}
+  else if(act==='toSat'){remove();P.sat.push(id);}
+  else if(act==='later'){remove();P.rest.push(id);}
+  save();renderPlan();
+}
+function onPlanChange(e){
+  const s=e.target.closest('select[data-ov]');if(!s)return;
+  const [d,k]=s.dataset.ov.split('.');S.ov[d][k]=s.value;save();renderPlan();
+}
+
+/* ---------- 画面：用事 ---------- */
+let editing=null;
+const F=$('taskForm');
+function resetForm(){
+  editing=null;F.reset();F.min.value='60';F.hard.value='普';
+  $('formTitle').textContent='用事を足す';$('saveBtn').textContent='足す';
+  $('cancelBtn').hidden=true;$('delBtn').hidden=true;
+}
+function editTask(id){
+  const t=T(id);if(!t)return;editing=id;
+  F.name.value=t.name;F.min.value=String(t.min);F.hard.value=t.hard;F.cat.value=t.cat;F.place.value=t.place;F.want.checked=t.want;
+  $('formTitle').textContent='用事を直す';$('saveBtn').textContent='保存';
+  $('cancelBtn').hidden=false;$('delBtn').hidden=false;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderTasks(){
+  $('taskList').innerHTML=S.tasks.length?S.tasks.map(t=>`<div class="trow ${t.on?'':'off'}">
+    <button class="sw ${t.on?'on':''}" data-sw="${t.id}">${t.on?'入れる':'休み'}</button>
+    <button class="tbody" data-edit="${t.id}"><div class="tname">${esc(t.name)}</div>
+    <div class="tmeta">${jm(t.min)}・${HARDNAME[t.hard]}・${esc(t.cat)}・${PLACENAME[t.place]}${t.want?'・★':''}</div></button></div>`).join('')
+    :'<div class="empty">用事がありません。上のフォームから足してください。</div>';
+}
+F.cat.addEventListener('change',()=>{if(F.cat.value==='農作業'&&F.place.value==='in')F.place.value='farm';});
+F.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=F.name.value.trim();if(!name)return;
+  const t={id:editing||uid(),name:name,min:+F.min.value,cat:F.cat.value,hard:F.hard.value,place:F.place.value,want:F.want.checked,on:true};
+  if(editing){const i=S.tasks.findIndex(x=>x.id===editing);t.on=S.tasks[i].on;S.tasks[i]=t;}else S.tasks.push(t);
+  save();resetForm();renderTasks();renderPlan();
+});
+$('cancelBtn').addEventListener('click',resetForm);
+$('delBtn').addEventListener('click',()=>{
+  const t=T(editing);if(!t)return;
+  if(!confirm(`「${t.name}」を削除します。よいですか？`))return;
+  S.tasks=S.tasks.filter(x=>x.id!==editing);delete S.done[editing];
+  save();resetForm();renderTasks();renderPlan();
+});
+$('taskList').addEventListener('click',e=>{
+  const sw=e.target.closest('[data-sw]');
+  if(sw){const t=T(sw.dataset.sw);t.on=!t.on;save();renderTasks();renderPlan();return;}
+  const ed=e.target.closest('[data-edit]');if(ed)editTask(ed.dataset.edit);
+});
+
+/* ---------- 画面：設定 ---------- */
+function fillSettings(){
+  const H=$('h-sat'),H2=$('h-sun');
+  const opts=[2,3,4,5,6,7,8,9,10,12].map(h=>`<option value="${h}">${h}時間</option>`).join('');
+  H.innerHTML=opts;H2.innerHTML=opts;
+  H.value=S.settings.hours.sat;H2.value=S.settings.hours.sun;
+  const st=[];for(let m=300;m<=600;m+=30)st.push(`<option value="${m}">${hm(m)}</option>`);
+  $('start').innerHTML=st.join('');$('start').value=S.settings.start;
+  ['home','farm'].forEach(k=>{
+    const p=S.settings.places[k];$('zip-'+k).value=p.zip||'';
+    $('res-'+k).className=p.lat!=null?'result ok':'result';
+    $('res-'+k).textContent=p.lat!=null?'✔ '+p.label:'';
+  });
+}
+$('h-sat').addEventListener('change',e=>{S.settings.hours.sat=+e.target.value;save();renderPlan();});
+$('h-sun').addEventListener('change',e=>{S.settings.hours.sun=+e.target.value;save();renderPlan();});
+$('start').addEventListener('change',e=>{S.settings.start=+e.target.value;save();renderPlan();});
+$('wxRefresh').addEventListener('click',()=>refreshWx(true));
+document.querySelectorAll('[data-lookup]').forEach(b=>b.addEventListener('click',()=>lookupZip(b.dataset.lookup)));
+
+/* ---------- 共通 ---------- */
+$('gen').addEventListener('click',()=>{
+  if(S.plan&&!confirm('今の並びを作りなおします。手で直した内容は消えます。よいですか？'))return;
+  generate();
+});
+$('days').addEventListener('click',onPlanClick);
+$('rest').addEventListener('click',onPlanClick);
+$('days').addEventListener('change',onPlanChange);
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['plan','tasks','set'].forEach(t=>{$('tab-'+t).hidden=(t!==b.dataset.tab);});
+  window.scrollTo(0,0);
+}));
+
+rollWeek();fillSettings();renderTasks();renderPlan();
+if(Date.now()-S.wxAt>3*3600*1000) refreshWx(false);
+})();
+</script>
+</body>
+</html>
