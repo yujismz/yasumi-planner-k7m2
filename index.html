@@ -4,26 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="休日プランナー">
-<title>休日プランナー</title>
+<meta name="apple-mobile-web-app-title" content="ゆるっと休日時間割">
+<title>ゆるっと休日時間割</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Kiwi+Maru:wght@400;500&family=Klee+One:wght@400;600&family=BIZ+UDPGothic:wght@400;700&display=swap">
 <style>
 :root{
   --bg:#f4f6f3; --card:#ffffff; --ink:#1f2a24; --sub:#5d6b63; --line:#dde3dc;
-  --main:#2f7d4f; --main-ink:#ffffff; --soft:#e3f1e8; --warn:#c0392b; --warn-soft:#fbe6e3;
+  --main:#2f7d4f; --main-ink:#ffffff; --warn:#c0392b; --warn-soft:#fbe6e3;
   --amber:#b7791f; --amber-soft:#fdf1da;
+  --fixed:#a8541f; --fixed-soft:#f6e4d4; --habit:#22705d; --habit-soft:#d9efe7;
+  --opt:#5b5f8a; --opt-soft:#e7e7f2; --rest:#f8f9f6; --shade:rgba(20,26,22,.45);
+  --hol:#c0392b;
+  --soft:color-mix(in srgb,var(--main) 14%,var(--card));
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#121614; --card:#1b211e; --ink:#e8eee9; --sub:#9aa9a0; --line:#2b3430;
-    --main:#4cb277; --main-ink:#0c1a12; --soft:#1f3328; --warn:#ff7b6b; --warn-soft:#3a1f1c;
+    --main:#4cb277; --main-ink:#0c1a12; --warn:#ff7b6b; --warn-soft:#3a1f1c;
     --amber:#e3b25a; --amber-soft:#3a2e17;
+    --fixed:#e8955f; --fixed-soft:#3a291b; --habit:#6fcbb4; --habit-soft:#19332b;
+    --opt:#a9acd0; --opt-soft:#292a3a; --rest:#171c19; --shade:rgba(0,0,0,.6);
+    --hol:#ff8a7a;
+    color-scheme:dark;
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
 body{
   background:var(--bg);color:var(--ink);
-  font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-family:var(--font,"Zen Maru Gothic"),"Hiragino Maru Gothic ProN",-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
   font-size:16px;line-height:1.5;
   padding-bottom:calc(76px + env(safe-area-inset-bottom));
 }
@@ -31,14 +42,42 @@ header{
   position:sticky;top:0;z-index:5;background:var(--bg);
   padding:calc(10px + env(safe-area-inset-top)) 16px 8px;border-bottom:1px solid var(--line);
 }
-header h1{margin:0;font-size:20px}
+header{display:flex;align-items:center;gap:10px}
+header .ht{flex:1;min-width:0}
+header h1{margin:0;font-size:21px;font-weight:900;letter-spacing:.02em}
+header h1 span{color:var(--main)}
+.about-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-weight:900;font-size:18px;color:var(--main);flex-shrink:0}
+.about h3{color:var(--ink);margin:12px 0 4px}
+.about ol,.about ul{margin:4px 0;padding-left:20px}
+.about li{margin:2px 0}
+.about .lead{font-size:15px}
+.sum{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px;margin:0}
+.sum dt{color:var(--sub)}
+.sum dd{margin:0;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.hero{font-size:44px;text-align:center;margin:8px 0 0}
 #weekLabel{color:var(--sub);font-size:14px}
 main{padding:12px 16px;max-width:640px;margin:0 auto}
 section[hidden]{display:none}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
 h2{font-size:18px;margin:0 0 8px}
 h3{font-size:15px;margin:14px 0 6px;color:var(--sub)}
-button{font:inherit;color:inherit}
+button{font:inherit;color:inherit;cursor:pointer;transition:transform .16s cubic-bezier(.3,1.6,.5,1),box-shadow .16s,filter .16s;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+/* 押した瞬間にふくらむ（iPhoneのキー入力のような反応） */
+button.pop{transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.18);filter:brightness(1.06);z-index:2;position:relative;transition:transform .05s ease-out,box-shadow .05s}
+.chk.pop,.sw.pop,.wd button.pop,.cal button.pop{transform:scale(1.18)}
+.primary.pop,.wiz-nav .btn.pop,nav button.pop{transform:scale(1.04)}
+nav button.pop{box-shadow:none}
+button:disabled{opacity:.45}
+@keyframes boing{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.done .chk{animation:boing .35s ease-out}
+.praise{border:3px solid var(--main);text-align:center}
+.praise .big{font-size:40px;margin:0}
+.praise p{font-size:18px}
+.fonts{display:grid;gap:8px;margin:6px 0}
+.fonts button{text-align:left;min-height:56px;border:2px solid var(--line);border-radius:12px;background:var(--card);padding:6px 12px}
+.fonts button.on{border-color:var(--main);background:var(--soft)}
+.fonts button b{display:block;font-size:17px}
+.fonts button span{font-size:12px;color:var(--sub)}
 .primary{
   width:100%;min-height:52px;border:0;border-radius:12px;background:var(--main);color:var(--main-ink);
   font-weight:700;font-size:17px;margin-bottom:14px
@@ -47,15 +86,14 @@ button{font:inherit;color:inherit}
 .btn.danger{color:var(--warn);border-color:var(--warn)}
 .btn.main{background:var(--main);color:var(--main-ink);border-color:var(--main);font-weight:700}
 .notice{background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
-.notice.bad{background:var(--warn-soft);color:var(--warn)}
-.dayhead{display:flex;justify-content:space-between;align-items:baseline}
+.notice .btn{margin-top:8px;min-height:38px}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .dayhead h2{margin:0}
-.progress{color:var(--sub);font-size:14px}
 .wx{margin:8px 0;font-size:14px}
 .wxrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 0}
 .wxrow b{min-width:3em}
 .wxrow select{margin-left:auto}
-select,input[type=text],input[type=tel],input[type=number]{
+select,input[type=text],input[type=tel],input[type=date]{
   font:inherit;font-size:16px;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:10px;
   background:var(--card);color:var(--ink);max-width:100%
 }
@@ -82,19 +120,37 @@ ul{list-style:none;margin:10px 0 0;padding:0}
 .tag{font-size:12px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--ink)}
 .tag.hard{background:var(--amber-soft);color:var(--amber)}
 .tag.warn{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.tag.fixed{background:var(--fixed-soft);color:var(--fixed);font-weight:700}
+.tag.habit{background:var(--habit-soft);color:var(--habit);font-weight:700}
+.tag.opt{background:var(--opt-soft);color:var(--opt);font-weight:700}
+.tag.carry{background:var(--amber-soft);color:var(--amber);font-weight:700}
+.tag.hol{background:var(--warn-soft);color:var(--hol);font-weight:700}
 .mv{grid-column:1/-1;display:flex;gap:6px}
 .mv button{flex:1;min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:14px}
-.lunch{padding:8px 0;border-top:1px dashed var(--line);color:var(--sub);font-size:13px;text-align:center}
+.lunch,.gap{margin:6px 0;padding:6px 12px;border:1px dashed var(--line);border-radius:10px;background:var(--rest);
+  color:var(--sub);font-size:13px;font-variant-numeric:tabular-nums}
 .empty{color:var(--sub);font-size:14px;padding:8px 0}
-/* 用事 */
+.bar{display:flex;align-items:center;gap:8px;margin:8px 0 2px}
+.bar .track{flex:1;height:8px;border-radius:999px;background:var(--soft);overflow:hidden}
+.bar .track i{display:block;height:100%;background:var(--main);border-radius:999px;transition:width .25s}
+.bar span{font-size:13px;color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cheer{font-size:14px;color:var(--main);font-weight:700;text-align:center;margin:10px 0 0}
+/* フォーム */
 .field{display:block;margin:10px 0}
-.field span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
-.field input[type=text],.field select{width:100%}
+.field>span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+.field input[type=text],.field select,.field input[type=date]{width:100%}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .checkline{display:flex;align-items:center;gap:10px;min-height:44px}
-.checkline input{width:24px;height:24px}
-.btnrow{display:flex;gap:8px;margin-top:10px}
+.checkline input{width:24px;height:24px;flex-shrink:0;accent-color:var(--main)}
+.btnrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .btnrow .btn{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.chips label{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:999px;font-size:14px;cursor:pointer;background:var(--card)}
+.chips label:has(input:checked){border-color:var(--main);background:var(--soft);font-weight:700}
+.chips input{accent-color:var(--main);margin:0}
+.wd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:6px 0}
+.wd button{min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:700}
+.wd button.on{background:var(--main);border-color:var(--main);color:var(--main-ink)}
 .trow{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .trow.off .tname{color:var(--sub);text-decoration:line-through}
 .sw{width:48px;height:48px;border-radius:12px;border:2px solid var(--line);background:var(--card);font-size:13px}
@@ -108,6 +164,52 @@ ul{list-style:none;margin:10px 0 0;padding:0}
 .zip input{flex:1;min-width:0}
 .result{font-size:13px;margin-top:4px}
 .ok{color:var(--main)} .ng{color:var(--warn)}
+textarea{width:100%;min-height:90px;font:13px ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+/* カレンダー */
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0}
+.calhead b{font-size:16px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal .dow{font-size:12px;text-align:center;color:var(--sub)}
+.cal .dow.su{color:var(--hol)}
+.cal button{position:relative;min-height:46px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:2px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.cal button small{font-size:9px;line-height:1.1;color:var(--hol);max-width:100%;overflow:hidden;white-space:nowrap}
+.cal button.on{background:var(--main);border-color:var(--main);color:var(--main-ink)}
+.cal button.on small{color:var(--main-ink)}
+.cal button.past{opacity:.45}
+.cal button.ovr::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.cal button.today{outline:2px solid var(--amber);outline-offset:-2px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--sub);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+/* 色 */
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0}
+.swatches button{min-height:64px;border-radius:12px;border:2px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 4px;font-size:13px;white-space:nowrap}
+.swatches button i{width:22px;height:22px;border-radius:50%;flex-shrink:0}
+.swatches button.on{border-color:var(--ink);font-weight:700}
+/* ガイド */
+#wizard{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding-bottom:env(safe-area-inset-bottom)}
+#wizard[hidden]{display:none}
+#wizard main{padding-top:calc(16px + env(safe-area-inset-top))}
+.steps{display:flex;gap:4px;margin:4px 0 14px}
+.steps i{flex:1;height:5px;border-radius:999px;background:var(--line)}
+.steps i.on{background:var(--main)}
+.wiz-nav{display:flex;gap:8px;position:sticky;bottom:0;background:var(--bg);padding:10px 0 14px}
+.wiz-nav .btn{flex:1;min-height:50px}
+.pick{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.pick input{width:24px;height:24px;accent-color:var(--main)}
+.ver{font-size:13px;color:var(--sub)}
+.ver h3{margin:10px 0 2px;color:var(--ink);font-size:14px}
+.ver ul{margin:0;padding-left:18px;list-style:disc}
+/* 確認・お知らせ・アラーム */
+.modal{position:fixed;inset:0;z-index:50;background:var(--shade);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.modal .box{background:var(--card);border-radius:14px;padding:18px;max-width:380px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.modal p{margin:0 0 6px;font-weight:700}
+.alarm-box{border:3px solid var(--main)}
+.alarm-box .big{font-size:22px;font-weight:800;margin:4px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;
+  background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:14px;max-width:calc(100% - 32px)}
+.toast[hidden]{display:none}
 nav{
   position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);
   padding-bottom:env(safe-area-inset-bottom);z-index:10
@@ -115,19 +217,23 @@ nav{
 nav button{flex:1;min-height:60px;border:0;background:none;font-size:13px;color:var(--sub)}
 nav button b{display:block;font-size:22px;line-height:1.1}
 nav button.on{color:var(--main);font-weight:700}
+:focus-visible{outline:2px solid var(--main);outline-offset:2px}
+@media (max-width:330px){.swatches{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){.bar .track i{transition:none}button,button.pop{transition:none;transform:none}.done .chk{animation:none}}
 </style>
 </head>
 <body>
 <header>
-  <h1>休日プランナー</h1>
-  <div id="weekLabel"></div>
+  <div class="ht"><h1>ゆるっと<span>休日</span>時間割</h1>
+  <div id="weekLabel"></div></div>
+  <button class="about-btn" id="aboutBtn" type="button" aria-label="このアプリについて">?</button>
 </header>
 
 <main>
-  <!-- ① 土日 -->
+  <!-- ① 休日 -->
   <section id="tab-plan">
     <div id="notice"></div>
-    <button id="gen" class="primary">時間割をつくる</button>
+    <button id="gen" class="primary" type="button">時間割をつくる</button>
     <div id="days"></div>
     <div id="rest"></div>
   </section>
@@ -136,25 +242,36 @@ nav button.on{color:var(--main);font-weight:700}
   <section id="tab-tasks" hidden>
     <form id="taskForm" class="card" autocomplete="off">
       <h2 id="formTitle">用事を足す</h2>
-      <label class="field"><span>用事の名前</span><input type="text" name="name" placeholder="例：草刈り" required></label>
+      <label class="field"><span>用事の名前</span><input type="text" name="name" id="f-name" placeholder="例：買い出し" required></label>
+      <div class="field"><span>入れ方</span>
+        <div class="chips" role="radiogroup" aria-label="入れ方">
+          <label><input type="radio" name="kind" value="free" checked>おまかせ</label>
+          <label><input type="radio" name="kind" value="fixed">日時が決まっている</label>
+          <label><input type="radio" name="kind" value="habit">毎朝の習慣</label>
+        </div>
+      </div>
+      <div class="row2" id="fixedRow" hidden>
+        <label class="field"><span>日にち</span><input type="date" name="date" id="f-date"></label>
+        <label class="field"><span>はじまる時刻</span><select name="at" id="f-at"></select></label>
+      </div>
       <div class="row2">
         <label class="field"><span>かかる時間</span>
-          <select name="min">
+          <select name="min" id="f-min">
             <option value="15">15分</option><option value="30">30分</option><option value="45">45分</option>
             <option value="60" selected>1時間</option><option value="90">1時間30分</option>
             <option value="120">2時間</option><option value="150">2時間30分</option>
             <option value="180">3時間</option><option value="240">4時間</option>
           </select></label>
         <label class="field"><span>きつさ</span>
-          <select name="hard"><option value="重">重い</option><option value="普" selected>ふつう</option><option value="軽">軽い</option></select></label>
+          <select name="hard" id="f-hard"><option value="重">重い</option><option value="普" selected>ふつう</option><option value="軽">軽い</option></select></label>
       </div>
       <div class="row2">
-        <label class="field"><span>種類</span>
-          <select name="cat"><option>家庭</option><option>自治会</option><option>会社</option><option>AI学習</option><option>農作業</option><option>その他</option></select></label>
-        <label class="field"><span>場所（天気に関係）</span>
-          <select name="place"><option value="in">室内</option><option value="home">自宅の外</option><option value="farm">農地</option></select></label>
+        <label class="field"><span>種類</span><select name="cat" id="f-cat"></select></label>
+        <label class="field"><span>場所（天気に関係）</span><select name="place" id="f-place"></select></label>
       </div>
-      <label class="checkline"><input type="checkbox" name="want"><span>やりたいこと（日曜の夕方に回さない）</span></label>
+      <label class="checkline"><input type="checkbox" name="want" id="f-want"><span>やりたいこと（休みの最終日の夕方に回さない）</span></label>
+      <label class="checkline"><input type="checkbox" name="opt" id="f-opt"><span>できたらでよい（時間が足りなければ「あとで」に回す）</span></label>
+      <label class="checkline"><input type="checkbox" name="noAlarm" id="f-noalarm"><span>この用事はアラームを鳴らさない</span></label>
       <div class="btnrow">
         <button type="submit" class="btn main" id="saveBtn">足す</button>
         <button type="button" class="btn" id="cancelBtn" hidden>やめる</button>
@@ -163,7 +280,7 @@ nav button.on{color:var(--main);font-weight:700}
     </form>
     <div class="card">
       <h2>用事の一覧</h2>
-      <div class="hint">左の「入れる」で、今週の時間割に入れるかを切りかえます。名前を押すと直せます。</div>
+      <div class="hint">左の「入れる」で、次の休みの時間割に入れるかを切りかえます。名前を押すと直せます。</div>
       <div id="taskList"></div>
     </div>
   </section>
@@ -171,113 +288,334 @@ nav button.on{color:var(--main);font-weight:700}
   <!-- ③ 設定 -->
   <section id="tab-set" hidden>
     <div class="card">
+      <h2>いまの設定</h2>
+      <dl class="sum" id="setSummary"></dl>
+      <div class="btnrow"><button class="btn" id="openGuide2" type="button">ガイドで見直す</button><button class="btn" id="aboutBtn2" type="button">アプリの説明</button><button class="btn danger" id="resetAll2" type="button">リセット</button></div>
+    </div>
+    <div class="card">
+      <h2>休日の決め方</h2>
+      <div id="set-holiday"></div>
+    </div>
+    <div class="card">
+      <h2>休日カレンダー</h2>
+      <div class="hint">日にちを押すと「休み⇔休みでない」を切りかえます。週や月によって休みが違うときはここで直します。</div>
+      <div id="set-cal"></div>
+    </div>
+    <div class="card">
+      <h2>休日に使える時間帯</h2>
+      <div id="set-time"></div>
+    </div>
+    <div class="card">
       <h2>天気の場所</h2>
-      <div class="hint">郵便番号を入れて「調べる」を押します。一度入れれば覚えておきます。</div>
-      <div class="place">
-        <b>自宅</b>
-        <div class="zip"><input type="tel" inputmode="numeric" id="zip-home" placeholder="例：400-0031"><button class="btn" data-lookup="home">調べる</button></div>
-        <div class="result" id="res-home"></div>
-      </div>
-      <div class="place">
-        <b>農作業の場所</b>
-        <div class="zip"><input type="tel" inputmode="numeric" id="zip-farm" placeholder="例：400-0031"><button class="btn" data-lookup="farm">調べる</button></div>
-        <div class="result" id="res-farm"></div>
-      </div>
-      <div class="btnrow"><button class="btn" id="wxRefresh">天気を取りなおす</button></div>
+      <div id="set-wx"></div>
+      <div class="btnrow"><button class="btn" id="wxRefresh" type="button">天気を取りなおす</button></div>
       <div class="result" id="wxStatus"></div>
     </div>
     <div class="card">
-      <h2>1日に使える時間</h2>
-      <div class="hint">「元気」の日の目安です。「ふつう」は8割、「疲れ気味」は6割で計算します。休憩10分は用事ごとに自動で入ります。</div>
-      <div class="row2">
-        <label class="field"><span>土曜</span><select id="h-sat"></select></label>
-        <label class="field"><span>日曜</span><select id="h-sun"></select></label>
-      </div>
-      <label class="field"><span>はじめる時刻</span><select id="start"></select></label>
+      <h2>アラーム</h2>
+      <div id="set-alarm"></div>
+    </div>
+    <div class="card">
+      <h2>ボタンの色</h2>
+      <div id="set-color"></div>
+    </div>
+    <div class="card">
+      <h2>文字の書体</h2>
+      <div id="set-font"></div>
+    </div>
+    <div class="card">
+      <h2>データの引っ越し</h2>
+      <div class="hint">用事や設定は、このブラウザの中だけに保存されます。スマホとパソコンなど別のところで使うときは「データをコピー」して、移す先のこの欄に貼り付けて「読み込む」を押します。</div>
+      <div class="btnrow"><button class="btn" id="copyData" type="button">データをコピー</button><button class="btn" id="loadData" type="button">読み込む</button></div>
+      <textarea id="dataText" aria-label="データ" placeholder="ここにコピーしたデータを貼り付け"></textarea>
+    </div>
+    <div class="card">
+      <h2>はじめからやりなおす</h2>
+      <div class="hint">「設定ガイド」は今のデータを残したまま、ガイドの順に設定を見直せます。「リセット」は用事も設定もすべて消して、最初の設定からやりなおします。</div>
+      <div class="btnrow"><button class="btn" id="openGuide" type="button">設定ガイドを開く</button><button class="btn danger" id="resetAll" type="button">リセット</button></div>
+    </div>
+    <div class="card ver">
+      <h2>このアプリについて</h2>
+      <div>ゆるっと休日時間割 <b id="verNo"></b></div>
+      <div id="changelog"></div>
     </div>
   </section>
 </main>
 
 <nav>
-  <button data-tab="plan" class="on"><b>📅</b>土日</button>
-  <button data-tab="tasks"><b>📝</b>用事</button>
-  <button data-tab="set"><b>⚙️</b>設定</button>
+  <button data-tab="plan" class="on" type="button"><b>📅</b>休日</button>
+  <button data-tab="tasks" type="button"><b>📝</b>用事</button>
+  <button data-tab="set" type="button"><b>⚙️</b>設定</button>
 </nav>
+
+<!-- 初期設定ガイド -->
+<div id="wizard" hidden>
+  <main>
+    <div class="steps" id="wizSteps"></div>
+    <div id="wizBody"></div>
+    <div class="wiz-nav">
+      <button class="btn" id="wizBack" type="button">もどる</button>
+      <button class="btn main" id="wizNext" type="button">次へ</button>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalMsg">
+  <div class="box">
+    <p id="modalMsg"></p>
+    <div class="hint" id="modalSub"></div>
+    <div class="btnrow"><button class="btn" id="modalNo" type="button">やめる</button><button class="btn main" id="modalOk" type="button">はい</button></div>
+  </div>
+</div>
+<div class="modal" id="alarmModal" hidden role="alertdialog" aria-modal="true" aria-labelledby="alarmTitle">
+  <div class="box alarm-box">
+    <p id="alarmTitle">⏰ もうすぐ予定の時間です</p>
+    <div class="big" id="alarmName"></div>
+    <div class="hint" id="alarmTime"></div>
+    <div class="btnrow"><button class="btn main" id="alarmOk" type="button">わかった</button></div>
+  </div>
+</div>
+<div class="modal" id="aboutModal" hidden role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="box about" style="max-height:85vh;overflow:auto">
+    <div id="aboutBody"></div>
+    <div class="btnrow"><button class="btn main" id="aboutOk" type="button">閉じる</button></div>
+  </div>
+</div>
+<div class="modal" id="praiseModal" hidden role="alertdialog" aria-modal="true" aria-labelledby="praiseMsg">
+  <div class="box praise">
+    <div class="big" id="praiseIcon">🎉</div>
+    <p id="praiseMsg"></p>
+    <div class="hint" id="praiseSub"></div>
+    <div class="btnrow"><button class="btn main" id="praiseOk" type="button">やったね！</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (function(){
 'use strict';
-const KEY='holidayPlanner.v1';
+const VERSION='2.0.0';
+const CHANGELOG=[
+  {v:'2.0.0',d:'2026-10-25',items:[
+    '初期設定ガイドを追加（用事を選ぶ → 休日の決め方 → 時間帯 → 天気の場所 → 色・アラーム）',
+    'よくある用事10件の見本から、使うものを選んで始められるように',
+    '休日の決め方を選べるように（旗日どおり／土日のみ／毎週決まった曜日／カレンダーで選ぶ）。祝日の扱いも選択可',
+    '休日カレンダーで日ごとに休みを切りかえ、月ごとの時間帯も設定可能に',
+    '時間割は土日固定ではなく「次の休み（連休は最大7日）」単位で作成',
+    '予定の前に知らせるアラーム（音・通知・画面表示、何分前か）',
+    'ボタンの色を8色から選べるように',
+    '「日時が決まっている用事」「毎朝の習慣」「できたらでよい」「持ち越し」を追加',
+    '1日ごとの進み具合バー、予定のすき間（空き時間）の表示',
+    'データの引っ越し（コピー／貼り付け）とリセットボタン',
+    '名前を「休日プランナー」から「ゆるっと休日時間割」に変更。文字の書体を5種類から選べるように（標準はZen丸ゴシック）',
+    'ボタンを押した瞬間にふくらむ反応をつけて、押したことがわかるように',
+    '予定どおりに終わったら、たくさんほめます',
+    '最初に「このアプリについて」の説明を表示。右上の「？」からいつでも見られます',
+    '「設定」の先頭に、いまの設定の一覧とリセットボタン',
+    'v1.0のデータはそのまま引き継ぎます']},
+  {v:'1.0.0',d:'2026-10-04',items:['最初の版（用事・天気・元気度から土日の時間割をつくる）']}
+];
+const KEY='holidayPlanner.v1'; // v1のデータを引き継ぐため同じ名前のまま
 const FACTOR={'元気':1,'ふつう':.8,'疲れ気味':.6};
 const HARDRANK={'重':3,'普':2,'軽':1};
 const HARDNAME={'重':'重い','普':'ふつう','軽':'軽い'};
-const PLACENAME={in:'室内',home:'自宅の外',farm:'農地'};
-const DAYNAME={sat:'土曜',sun:'日曜'};
+const CATS=['家事','買い物','仕事','学び','健康','趣味','地域','農作業','その他'];
+const WD=['日','月','火','水','木','金','土'];
 const WXICON={'晴れ':'☀️','くもり':'☁️','雨':'☔'};
 const BREAK=10;
+const COLORS={
+  green:{name:'みどり',light:'#2f7d4f',dark:'#4cb277'},
+  blue:{name:'あお',light:'#2563a8',dark:'#5fa3ec'},
+  indigo:{name:'あい',light:'#4a4fb8',dark:'#959af2'},
+  teal:{name:'あさぎ',light:'#0f766e',dark:'#4fd1c5'},
+  orange:{name:'だいだい',light:'#b85410',dark:'#f39a5b'},
+  red:{name:'あか',light:'#b83232',dark:'#f27f7f'},
+  purple:{name:'むらさき',light:'#7a4cc2',dark:'#b99af5'},
+  brown:{name:'ちゃ',light:'#7a5a2e',dark:'#d0ae7c'}
+};
+const FONTS={
+  zen:{name:'Zen丸ゴシック',family:'"Zen Maru Gothic"',note:'まるくてやさしい。いちばん読みやすい標準'},
+  mplus:{name:'M PLUS Rounded',family:'"M PLUS Rounded 1c"',note:'すっきりポップな丸ゴシック'},
+  kiwi:{name:'キウイ丸',family:'"Kiwi Maru"',note:'ころころ手づくり風。楽しい雰囲気'},
+  klee:{name:'クレー（手書き風）',family:'"Klee One"',note:'ノートに鉛筆で書いたような字'},
+  biz:{name:'BIZ UDゴシック',family:'"BIZ UDPGothic"',note:'くっきり読みやすいユニバーサルデザイン'}
+};
+const RULES=[
+  ['calendar','旗日どおり（土・日・祝日が休み）'],
+  ['weekend','土日のみ（祝日は休みにしない）'],
+  ['weekdays','毎週決まった曜日'],
+  ['custom','カレンダーで1日ずつ選ぶ（週・月ごとに違う人向け）']
+];
+const SAMPLES=[
+  {name:'掃除・洗濯',min:60,cat:'家事',hard:'普',place:'in'},
+  {name:'買い出し',min:60,cat:'買い物',hard:'軽',place:'in'},
+  {name:'料理の作り置き',min:90,cat:'家事',hard:'普',place:'in'},
+  {name:'布団干し・シーツの洗濯',min:30,cat:'家事',hard:'軽',place:'home'},
+  {name:'庭の手入れ・草取り',min:90,cat:'家事',hard:'重',place:'home'},
+  {name:'銀行・役所の用事',min:60,cat:'その他',hard:'軽',place:'in'},
+  {name:'朝の散歩・ストレッチ',min:30,cat:'健康',hard:'軽',place:'in',kind:'habit'},
+  {name:'読書・勉強',min:60,cat:'学び',hard:'軽',place:'in',want:true},
+  {name:'部屋の片付け',min:60,cat:'家事',hard:'普',place:'in',opt:true},
+  {name:'次の1週間の予定を立てる',min:30,cat:'仕事',hard:'軽',place:'in'}
+];
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 const hm=m=>pad(Math.floor(m/60))+':'+pad(m%60);
 const jm=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?`${h}時間${r}分`:`${h}時間`):`${r}分`};
-
-/* ---------- データ ---------- */
-function defaults(){
-  return {
-    tasks:[
-      {id:'s1',name:'掃除・洗濯のまとめ',min:60,cat:'家庭',hard:'普',place:'in',want:false,on:true},
-      {id:'s2',name:'買い出し',min:60,cat:'家庭',hard:'軽',place:'in',want:false,on:true},
-      {id:'s3',name:'自治会イベントの準備',min:90,cat:'自治会',hard:'普',place:'in',want:false,on:true},
-      {id:'s4',name:'会社の仕事の残り',min:90,cat:'会社',hard:'普',place:'in',want:false,on:true},
-      {id:'s5',name:'AIの勉強',min:90,cat:'AI学習',hard:'軽',place:'in',want:true,on:true},
-      {id:'s6',name:'草刈り',min:120,cat:'農作業',hard:'重',place:'farm',want:false,on:true},
-      {id:'s7',name:'畑の見回り・水やり',min:30,cat:'農作業',hard:'軽',place:'farm',want:false,on:true}
-    ],
-    settings:{
-      places:{home:{zip:'',label:'',lat:null,lon:null},farm:{zip:'',label:'',lat:null,lon:null}},
-      hours:{sat:8,sun:6}, start:480
-    },
-    week:'', genki:{sat:'ふつう',sun:'ふつう'},
-    ov:{sat:{home:'',farm:''},sun:{home:'',farm:''}},
-    plan:null, done:{}, wx:{home:null,farm:null}, wxAt:0
-  };
-}
-function load(){
-  const d=defaults();
-  try{
-    const raw=localStorage.getItem(KEY);
-    if(!raw) return d;
-    const o=JSON.parse(raw);
-    const s=Object.assign(d,o);
-    s.settings=Object.assign(d.settings,o.settings||{});
-    s.settings.places=Object.assign(defaults().settings.places,(o.settings||{}).places||{});
-    s.settings.hours=Object.assign({sat:8,sun:6},(o.settings||{}).hours||{});
-    return s;
-  }catch(e){return d;}
-}
-let S=load();
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-const T=id=>S.tasks.find(t=>t.id===id);
 const uid=()=>'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 
 /* ---------- 日付 ---------- */
 const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-function addDays(s,n){const [y,m,d]=s.split('-').map(Number);return iso(new Date(y,m-1,d+n));}
-function thisSaturday(){
-  const t=new Date(),dow=t.getDay();
-  const off=dow===0?-1:6-dow;
-  return iso(new Date(t.getFullYear(),t.getMonth(),t.getDate()+off));
+const toDate=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const addDays=(s,n)=>{const d=toDate(s);d.setDate(d.getDate()+n);return iso(d);};
+const today=()=>iso(new Date());
+const md=s=>{const d=toDate(s);return `${d.getMonth()+1}/${d.getDate()}`;};
+const dowOf=s=>toDate(s).getDay();
+const dayLabel=s=>`${md(s)}（${WD[dowOf(s)]}）`;
+const nowMin=()=>{const n=new Date();return n.getHours()*60+n.getMinutes();};
+
+/* ---------- 日本の祝日（計算で出す） ---------- */
+const holCache={};
+function jpHolidays(y){
+  if(holCache[y])return holCache[y];
+  const h={};const set=(m,d,n)=>{h[`${y}-${pad(m)}-${pad(d)}`]=n;};
+  const nthMon=(m,n)=>{const f=new Date(y,m-1,1).getDay();return 1+((8-f)%7)+(n-1)*7;};
+  set(1,1,'元日');set(1,nthMon(1,2),'成人の日');set(2,11,'建国記念の日');set(2,23,'天皇誕生日');
+  const k=y-1980;
+  set(3,Math.floor(20.8431+0.242194*k-Math.floor(k/4)),'春分の日');
+  set(4,29,'昭和の日');set(5,3,'憲法記念日');set(5,4,'みどりの日');set(5,5,'こどもの日');
+  set(7,nthMon(7,3),'海の日');set(8,11,'山の日');set(9,nthMon(9,3),'敬老の日');
+  set(9,Math.floor(23.2488+0.242194*k-Math.floor(k/4)),'秋分の日');
+  set(10,nthMon(10,2),'スポーツの日');set(11,3,'文化の日');set(11,23,'勤労感謝の日');
+  // 振替休日
+  Object.keys(h).sort().forEach(s=>{
+    if(dowOf(s)===0){let n=addDays(s,1);while(h[n])n=addDays(n,1);h[n]='振替休日';}
+  });
+  // 国民の休日（祝日にはさまれた平日）
+  Object.keys(h).sort().forEach(s=>{
+    const n=addDays(s,1),n2=addDays(s,2);
+    if(!h[n]&&h[n2]&&dowOf(n)!==0)h[n]='国民の休日';
+  });
+  return holCache[y]=h;
 }
-function rollWeek(){
-  const sat=thisSaturday();
-  if(S.week!==sat){
-    S.week=sat; S.genki={sat:'ふつう',sun:'ふつう'};
-    S.ov={sat:{home:'',farm:''},sun:{home:'',farm:''}};
-    S.plan=null; S.done={}; save();
+const holName=s=>jpHolidays(+s.slice(0,4))[s]||'';
+
+/* ---------- 確認・お知らせ（アプリ内） ---------- */
+function ask(msg,sub,okLabel){
+  return new Promise(res=>{
+    const M=$('modal');$('modalMsg').textContent=msg;$('modalSub').textContent=sub||'';
+    $('modalOk').textContent=okLabel||'はい';M.hidden=false;$('modalNo').focus();
+    const done=v=>{M.hidden=true;$('modalOk').onclick=$('modalNo').onclick=null;document.removeEventListener('keydown',key);res(v);};
+    const key=e=>{if(e.key==='Escape')done(false);};
+    $('modalOk').onclick=()=>done(true);$('modalNo').onclick=()=>done(false);
+    document.addEventListener('keydown',key);
+  });
+}
+let toastT;
+function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true;},2400);}
+
+/* ---------- データ ---------- */
+function fresh(){
+  return {
+    schema:2, setup:false, news:true, tasks:[],
+    settings:{
+      rule:'calendar', weekdays:[0,6], holidayOff:true, overrides:{},
+      start:480, end:1080, lunch:true, monthTime:{},
+      places:{home:{zip:'',label:'',lat:null,lon:null,name:'自宅'},farm:{zip:'',label:'',lat:null,lon:null,name:'畑・作業場'}},
+      color:'green', font:'zen',
+      alarm:{on:false,lead:10,type:'both',sound:'chime'}
+    },
+    blockKey:'', blockDays:[], genki:{}, ov:{}, plan:null, done:{}, fired:{}, wx:{home:null,farm:null}, wxAt:0
+  };
+}
+function fixTask(t){
+  t.kind=['free','fixed','habit'].includes(t.kind)?t.kind:'free';
+  t.want=!!t.want;t.opt=!!t.opt;t.carry=!!t.carry;t.noAlarm=!!t.noAlarm;t.on=t.on!==false;
+  if(t.kind==='fixed'){if(!/^\d{4}-\d{2}-\d{2}$/.test(t.date||''))t.date=today();t.at=Number.isFinite(+t.at)?+t.at:540;}
+  if(!(t.hard in HARDRANK))t.hard='普';if(!['in','home','farm'].includes(t.place))t.place='in';
+  t.min=+t.min||60;t.cat=t.cat||'その他';return t;
+}
+function upgrade(o){
+  const s=fresh(),wasV1=!!(o&&o.tasks&&!o.schema);
+  const os=(o&&o.settings)||{};
+  Object.assign(s,o||{});
+  s.settings=Object.assign(fresh().settings,os);
+  s.settings.places=Object.assign(fresh().settings.places,os.places||{});
+  ['home','farm'].forEach(k=>{s.settings.places[k]=Object.assign(fresh().settings.places[k],s.settings.places[k]);});
+  s.settings.alarm=Object.assign(fresh().settings.alarm,os.alarm||{});
+  s.settings.overrides=os.overrides||{};s.settings.monthTime=os.monthTime||{};
+  if(!COLORS[s.settings.color])s.settings.color='green';
+  if(!FONTS[s.settings.font])s.settings.font='zen';
+  if(wasV1){ // v1.0からの引き継ぎ
+    s.setup=true;s.news=true;
+    s.settings.places.farm.name='農地';
+    const h=(os.hours&&os.hours.sat)||8;s.settings.end=Math.min(1380,(+os.start||480)+h*60+60);
+    delete s.settings.hours;
+    s.plan=null;s.done={};s.genki={};s.ov={};s.week=undefined;
   }
+  s.tasks=(Array.isArray(s.tasks)?s.tasks:[]).map(fixTask);
+  ['genki','ov','done','fired'].forEach(k=>{if(!s[k]||typeof s[k]!=='object')s[k]={};});
+  if(!Array.isArray(s.blockDays))s.blockDays=[];
+  if(s.plan&&!(s.plan.days&&Array.isArray(s.plan.rest)))s.plan=null;
+  s.schema=2;return s;
 }
-const dateOf=d=>d==='sat'?S.week:addDays(S.week,1);
-const md=s=>{const p=s.split('-');return `${+p[1]}/${+p[2]}`;};
+function load(){
+  try{const raw=localStorage.getItem(KEY);if(!raw)return fresh();return upgrade(JSON.parse(raw));}
+  catch(e){return fresh();}
+}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const T=id=>S.tasks.find(t=>t.id===id);
+const isFree=t=>t.kind==='free';
+const dk=(d,id)=>d+'|'+id;
+const placeName=k=>k==='in'?'室内':(S.settings.places[k].name||(k==='home'?'自宅':'作業場'))+(k==='home'?'の外':'');
+
+/* ---------- 休日の判定 ---------- */
+function baseHoliday(s){
+  const st=S.settings,dow=dowOf(s),hol=!!holName(s);
+  if(st.rule==='calendar')return dow===0||dow===6||hol;
+  if(st.rule==='weekend')return dow===0||dow===6;
+  if(st.rule==='weekdays')return st.weekdays.includes(dow)||(st.holidayOff&&hol);
+  return st.holidayOff&&hol; // custom
+}
+function isHoliday(s){const o=S.settings.overrides[s];return o?o==='on':baseHoliday(s);}
+function rangeOf(s){const mt=S.settings.monthTime[s.slice(0,7)];return mt||{start:S.settings.start,end:S.settings.end};}
+function computeBlock(){
+  const t=today();let start=null;
+  if(isHoliday(t)){start=t;while(S.blockDays.includes(addDays(start,-1))&&isHoliday(addDays(start,-1)))start=addDays(start,-1);}
+  else for(let i=1;i<=62;i++){const d=addDays(t,i);if(isHoliday(d)){start=d;break;}}
+  if(!start)return [];
+  const out=[start];while(out.length<7&&isHoliday(addDays(out[out.length-1],1)))out.push(addDays(out[out.length-1],1));
+  return out;
+}
+function rollBlock(){
+  const days=computeBlock(),key=days.join(',');
+  if(key===S.blockKey)return;
+  const old=S.blockDays||[],ended=!old.length||old[old.length-1]<today();
+  if(ended||!S.plan){
+    if(S.plan&&old.length){ // 前の休みで終わらなかった用事に「持ち越し」
+      const planned=new Set(Object.values(S.plan.days).flat().concat(S.plan.rest));
+      S.tasks.forEach(t=>{if(!isFree(t)||!t.on)return;const fin=old.some(d=>S.done[dk(d,t.id)]);if(fin)t.carry=false;else if(planned.has(t.id))t.carry=true;});
+    }
+    S.plan=null;S.done={};S.genki={};S.ov={};S.fired={};
+  }else{ // 設定の変更で休みの日が変わった
+    Object.keys(S.plan.days).forEach(d=>{if(!days.includes(d)){S.plan.rest.push(...S.plan.days[d]);delete S.plan.days[d];}});
+    days.forEach(d=>{if(!S.plan.days[d])S.plan.days[d]=[];});
+  }
+  S.blockDays=days;S.blockKey=key;save();
+}
+
+/* ---------- 色 ---------- */
+const mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):{matches:false};
+function applyColor(){
+  document.documentElement.style.setProperty('--font',(FONTS[S.settings.font]||FONTS.zen).family);
+  const c=COLORS[S.settings.color]||COLORS.green,dark=mq.matches;
+  document.documentElement.style.setProperty('--main',dark?c.dark:c.light);
+  document.documentElement.style.setProperty('--main-ink',dark?'#0d120f':'#ffffff');
+  const meta=document.querySelector('meta[name=theme-color]');if(meta)meta.content=dark?c.dark:c.light;
+}
+if(mq.addEventListener)mq.addEventListener('change',applyColor);
 
 /* ---------- 天気 ---------- */
 function kindOf(w){
@@ -287,9 +625,9 @@ function kindOf(w){
   return '晴れ';
 }
 function wxInfo(d,key){
-  const o=S.ov[d][key];
+  const o=(S.ov[d]||{})[key];
   if(o) return {kind:o,text:'手で選んだ天気',manual:true};
-  const w=S.wx[key]&&S.wx[key][dateOf(d)];
+  const w=S.wx[key]&&S.wx[key][d];
   if(!w) return null;
   const k=kindOf(w); if(!k) return null;
   return {kind:k,text:`降水${w.prob==null?'-':w.prob}%・最高${Math.round(w.tmax)}℃`};
@@ -298,7 +636,7 @@ async function fetchWx(key){
   const p=S.settings.places[key];
   if(!p||p.lat==null) return false;
   const url=`https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}`+
-    `&daily=weather_code,precipitation_probability_max,temperature_2m_max&timezone=Asia%2FTokyo&past_days=1&forecast_days=10`;
+    `&daily=weather_code,precipitation_probability_max,temperature_2m_max&timezone=Asia%2FTokyo&past_days=1&forecast_days=14`;
   const r=await fetch(url); if(!r.ok) throw new Error('天気の取得に失敗');
   const j=await r.json(); const out={};
   j.daily.time.forEach((t,i)=>{out[t]={code:j.daily.weather_code[i],prob:j.daily.precipitation_probability_max[i],tmax:j.daily.temperature_2m_max[i]};});
@@ -314,15 +652,15 @@ async function refreshWx(showStatus){
   }
   if(ok) {S.wxAt=Date.now(); save();}
   if(showStatus){
-    if(ng) {st.className='result ng';st.textContent='天気を取れませんでした（通信を確認してください）。土日の画面で手で選べます。';}
+    if(ng) {st.className='result ng';st.textContent='天気を取れませんでした（通信を確認してください）。休日の画面で手で選べます。';}
     else if(ok) {st.className='result ok';st.textContent='天気を更新しました。';}
     else {st.className='result';st.textContent='先に郵便番号を登録してください。';}
   }
   renderPlan();
 }
-async function lookupZip(key){
-  const input=$('zip-'+key), res=$('res-'+key);
-  const zip=input.value.normalize('NFKC').replace(/[^0-9]/g,'');
+async function lookupZip(key,zipRaw,resEl){
+  const res=resEl;
+  const zip=String(zipRaw).normalize('NFKC').replace(/[^0-9]/g,'');
   if(zip.length!==7){res.className='result ng';res.textContent='郵便番号は7けたで入れてください。';return;}
   res.className='result';res.textContent='調べています…';
   try{
@@ -339,23 +677,29 @@ async function lookupZip(key){
       hit=list.find(x=>x.admin1&&(x.admin1===a.address1||a.address1.indexOf(x.admin1.replace(/[県府都]$/,''))===0))||null;
       if(hit) break;
     }
-    if(!hit){res.className='result ng';res.textContent=`${a.address1}${a.address2} は見つかりましたが、天気の場所を決められませんでした。土日の画面で手で選べます。`;return;}
-    S.settings.places[key]={zip:zip,label:`${a.address1}${a.address2}${a.address3}`,lat:hit.latitude,lon:hit.longitude};
+    if(!hit){res.className='result ng';res.textContent=`${a.address1}${a.address2} は見つかりましたが、天気の場所を決められませんでした。休日の画面で手で選べます。`;return;}
+    Object.assign(S.settings.places[key],{zip:zip,label:`${a.address1}${a.address2}${a.address3}`,lat:hit.latitude,lon:hit.longitude});
     save();
     res.className='result ok';res.textContent=`✔ ${S.settings.places[key].label}（天気は${hit.name}あたりで見ます）`;
-    await refreshWx(true);
+    await refreshWx(false);
   }catch(e){
     res.className='result ng';res.textContent='通信できませんでした。あとでもう一度お試しください。';
   }
 }
 
 /* ---------- 時間割づくり ---------- */
-const cap=d=>S.settings.hours[d]*60*FACTOR[S.genki[d]];
+const lunchOf=d=>{const r=rangeOf(d);return S.settings.lunch&&r.start<780&&r.end>720?60:0;};
+const cap=d=>{const r=rangeOf(d);return Math.max(0,(r.end-r.start-lunchOf(d)))*FACTOR[S.genki[d]||'ふつう'];};
 const load_=id=>T(id).min+BREAK;
+const habitsOf=()=>S.tasks.filter(t=>t.on&&t.kind==='habit');
+const fixedOf=d=>S.tasks.filter(t=>t.on&&t.kind==='fixed'&&t.date===d).sort((a,b)=>a.at-b.at);
+const anchoredLoad=d=>habitsOf().concat(fixedOf(d)).reduce((s,t)=>s+t.min+BREAK,0);
+const dayIds=d=>S.plan?habitsOf().map(t=>t.id).concat(fixedOf(d).map(t=>t.id),S.plan.days[d]||[]):[];
+const lastDay=()=>S.blockDays[S.blockDays.length-1];
 
 function orderDay(ids,g){
   const B={'重':[],'普':[],'軽':[]};
-  ids.map(T).sort((a,b)=>(b.want-a.want)||(b.min-a.min)).forEach(t=>B[t.hard].push(t));
+  ids.map(T).sort((a,b)=>(a.opt-b.opt)||(b.carry-a.carry)||(b.want-a.want)||(b.min-a.min)).forEach(t=>B[t.hard].push(t));
   const pattern=g==='疲れ気味'?['普','軽','重','軽','普']:['重','軽','普','軽','重','普'];
   const out=[];let i=0,prev=null;
   while(out.length<ids.length){
@@ -364,160 +708,226 @@ function orderDay(ids,g){
     const h=order.find(x=>B[x].length&&!(x==='重'&&prev==='重'))||order.find(x=>B[x].length);
     out.push(B[h].shift().id);prev=h;
   }
-  return out;
+  return out.filter(id=>!T(id).opt).concat(out.filter(id=>T(id).opt));
 }
 function generate(){
-  const tasks=S.tasks.filter(t=>t.on);
-  const days=['sat','sun'],used={sat:0,sun:0},hardUsed={sat:0,sun:0},buckets={sat:[],sun:[]},rest=[];
+  const days=S.blockDays.slice();if(!days.length)return;
+  const tasks=S.tasks.filter(t=>t.on&&isFree(t));
+  const used={},hardUsed={},buckets={},rest=[];
+  days.forEach(d=>{used[d]=anchoredLoad(d);hardUsed[d]=0;buckets[d]=[];});
   const sorted=tasks.slice().sort((a,b)=>
-    ((b.place!=='in')-(a.place!=='in'))||(b.want-a.want)||(HARDRANK[b.hard]-HARDRANK[a.hard])||(b.min-a.min));
+    (a.opt-b.opt)||((b.place!=='in')-(a.place!=='in'))||(b.carry-a.carry)||(b.want-a.want)||(HARDRANK[b.hard]-HARDRANK[a.hard])||(b.min-a.min));
   for(const t of sorted){
     const load=t.min+BREAK;let best=null,bestScore=1e9;
     for(const d of days){
       let kind=null;
       if(t.place!=='in'){const w=wxInfo(d,t.place);kind=w?w.kind:null;}
       if(kind==='雨') continue;
-      if(used[d]+load>cap(d)) continue;
-      let score=(used[d]+load)/cap(d);
-      if(t.hard==='重') score+=hardUsed[d]/cap(d)*0.6;
+      const c=cap(d);if(!c||used[d]+load>c) continue;
+      let score=(used[d]+load)/c;
+      if(t.hard==='重') score+=hardUsed[d]/c*0.6;
       if(kind==='くもり') score+=0.15;
-      if(d==='sun'&&t.want) score+=0.05;
+      if(days.length>1&&d===lastDay()&&t.want) score+=0.05;
       if(score<bestScore){bestScore=score;best=d;}
     }
     if(best){buckets[best].push(t.id);used[best]+=load;if(t.hard==='重')hardUsed[best]+=load;}
     else rest.push(t.id);
   }
-  S.plan={sat:orderDay(buckets.sat,S.genki.sat),sun:orderDay(buckets.sun,S.genki.sun),rest:rest};
-  save();renderPlan();
+  S.plan={days:{},rest:rest};
+  days.forEach(d=>{S.plan.days[d]=orderDay(buckets[d],S.genki[d]||'ふつう');});
+  S.fired={};save();renderPlan();
 }
+// 1日の並び：習慣 → おまかせの用事（日時が決まっている用事のすき間にも詰める）。昼休みは12時以降の最初の区切り
 function times(d){
-  const out=[];let cur=S.settings.start,lunch=false;
-  for(const id of S.plan[d]){
-    if(!lunch&&cur>=720){out.push({lunch:true,s:cur,e:cur+60});cur+=60;lunch=true;}
-    const t=T(id);out.push({id:id,s:cur,e:cur+t.min});cur+=t.min+BREAK;
+  const out=[],r=rangeOf(d);let cur=r.start,lunch=!lunchOf(d);
+  const fixed=fixedOf(d).slice();
+  const gapTo=s=>{if(s-cur>=15)out.push({gap:true,s:cur,e:s});};
+  const putFixed=()=>{const f=fixed.shift();if(f.at>cur)gapTo(f.at);out.push({id:f.id,s:f.at,e:f.at+f.min,clash:f.at<cur});cur=Math.max(cur,f.at+f.min+BREAK);};
+  for(const t of habitsOf()){out.push({id:t.id,s:cur,e:cur+t.min});cur+=t.min+BREAK;}
+  const queue=(S.plan&&S.plan.days[d]||[]).filter(id=>T(id));
+  while(queue.length){
+    if(fixed.length&&fixed[0].at<=cur){putFixed();continue;}
+    if(!lunch&&cur>=720){
+      if(fixed.length&&fixed[0].at<cur+60){putFixed();continue;}
+      out.push({lunch:true,s:cur,e:cur+60});cur+=60;lunch=true;continue;
+    }
+    let i=0;
+    if(fixed.length&&cur+T(queue[0]).min>fixed[0].at){
+      i=queue.findIndex(id=>cur+T(id).min<=fixed[0].at);
+      if(i<0){putFixed();continue;}
+    }
+    const id=queue.splice(i,1)[0],t=T(id);
+    out.push({id:id,s:cur,e:cur+t.min});cur+=t.min+BREAK;
   }
+  while(fixed.length)putFixed();
   return out;
 }
 
-/* ---------- 画面：土日 ---------- */
-function planIds(){return S.plan?S.plan.sat.concat(S.plan.sun,S.plan.rest):[];}
+/* ---------- 画面：休日 ---------- */
+function planIds(){return S.plan?Object.values(S.plan.days).flat().concat(S.plan.rest):[];}
 function renderPlan(){
-  // 消えた用事を取り除く
-  if(S.plan){['sat','sun','rest'].forEach(k=>{S.plan[k]=S.plan[k].filter(id=>T(id));});}
-  const sat=S.week,sun=addDays(S.week,1);
-  $('weekLabel').textContent=`${md(sat)}（土）・${md(sun)}（日）の計画`;
+  if(S.plan){
+    Object.keys(S.plan.days).forEach(d=>{S.plan.days[d]=S.plan.days[d].filter(id=>T(id)&&isFree(T(id)));});
+    S.plan.rest=S.plan.rest.filter(id=>T(id)&&isFree(T(id)));
+  }
+  const days=S.blockDays;
+  $('weekLabel').textContent=days.length?(days.length>1?`次の休み：${dayLabel(days[0])}〜${dayLabel(days[days.length-1])}（${days.length}日）`:`次の休み：${dayLabel(days[0])}`):'次の休みが見つかりません';
   let notice='';
-  if(!S.plan) notice='<div class="notice">まだ時間割がありません。元気度と天気を見てから「時間割をつくる」を押してください。</div>';
+  if(S.news&&S.setup) notice+=`<div class="notice">「ゆるっと休日時間割」v${VERSION}になりました（旧：休日プランナー）。休日の決め方・アラーム・ボタンの色を選べるようになりました。<br><button class="btn" type="button" data-act="news">設定ガイドで確認する</button> <button class="btn" type="button" data-act="newsClose">閉じる</button></div>`;
+  if(!days.length) notice+='<div class="notice">これから2か月のあいだに休日がありません。「設定」の休日の決め方かカレンダーを見直してください。</div>';
+  else if(!S.plan) notice+='<div class="notice">まだ時間割がありません。元気度と天気を見てから「時間割をつくる」を押してください。</div>';
   else{
-    const cur=S.tasks.filter(t=>t.on).map(t=>t.id).sort().join(','),old=planIds().sort().join(',');
-    if(cur!==old) notice='<div class="notice">用事が変わりました。「時間割をつくる」で反映できます。</div>';
+    const cur=S.tasks.filter(t=>t.on&&isFree(t)).map(t=>t.id).sort().join(','),old=planIds().sort().join(',');
+    if(cur!==old) notice+='<div class="notice">用事が変わりました。「時間割をつくる」で反映できます。</div>';
   }
   $('notice').innerHTML=notice;
-  $('days').innerHTML=['sat','sun'].map(dayCard).join('');
+  $('gen').hidden=!days.length;
+  $('days').innerHTML=days.map(dayCard).join('');
   const rest=S.plan?S.plan.rest:[];
+  const moveBtns=id=>days.length>3?`<select data-moveto="${id}" aria-label="入れる日"><option value="">日を選んで入れる</option>${days.map(d=>`<option value="${d}">${dayLabel(d)}</option>`).join('')}</select>`
+    :days.map(d=>`<button type="button" data-act="to" data-to="${d}" data-id="${id}">${dayLabel(d)}に入れる</button>`).join('');
   $('rest').innerHTML=rest.length?`<div class="card"><h2>入りきらなかった用事</h2>
-    <div class="hint">雨の日に外の作業を入れない、時間があふれた、などの用事です。来週に回すか、日を選んで入れます。</div>
+    <div class="hint">雨の日に外の作業を入れない、時間があふれた、「できたらでよい」が残った、などの用事です。次の休みに回すか、日を選んで入れます。終わらなかった用事には次の休みで「持ち越し」の印がつきます。</div>
     <ul>${rest.map(id=>{const t=T(id);return `<li class="item"><div></div><div class="body"><div class="name">${esc(t.name)}</div>
       <div class="tags">${tags(t)}</div></div>
-      <div class="mv"><button data-act="toSat" data-id="${id}">土曜に入れる</button><button data-act="toSun" data-id="${id}">日曜に入れる</button></div></li>`;}).join('')}</ul></div>`:'';
+      <div class="mv">${moveBtns(id)}</div></li>`;}).join('')}</ul></div>`:'';
 }
 function tags(t){
-  return `<span class="tag">${esc(t.cat)}</span><span class="tag ${t.hard==='重'?'hard':''}">${HARDNAME[t.hard]}</span>`+
-    (t.place!=='in'?`<span class="tag">${PLACENAME[t.place]}</span>`:'')+(t.want?'<span class="tag">★やりたい</span>':'');
+  const k=t.kind==='fixed'?`<span class="tag fixed">固定 ${md(t.date)} ${hm(t.at)}</span>`:t.kind==='habit'?'<span class="tag habit">習慣</span>':'';
+  return k+(t.carry&&isFree(t)?'<span class="tag carry">持ち越し</span>':'')+(t.opt?'<span class="tag opt">できたら</span>':'')+
+    `<span class="tag">${esc(t.cat)}</span><span class="tag ${t.hard==='重'?'hard':''}">${HARDNAME[t.hard]}</span>`+
+    (t.place!=='in'?`<span class="tag">${esc(placeName(t.place))}</span>`:'')+(t.want?'<span class="tag">★やりたい</span>':'');
 }
-function wxRow(d,key,label){
-  const w=wxInfo(d,key),ov=S.ov[d][key];
+function wxRow(d,key){
+  const p=S.settings.places[key];
+  if(p.lat==null&&!(S.ov[d]||{})[key]&&key==='farm'&&!S.tasks.some(t=>t.on&&t.place==='farm'))return '';
+  const label=p.name||key;
+  const w=wxInfo(d,key),ov=(S.ov[d]||{})[key]||'';
   const txt=w?`${WXICON[w.kind]} ${w.kind}　<span class="hint">${w.text}</span>`:'<span class="hint">未取得（手で選べます）</span>';
-  return `<div class="wxrow"><b>${label}</b><span>${txt}</span>
-    <select data-ov="${d}.${key}" aria-label="${label}の天気を手で選ぶ">
+  return `<div class="wxrow"><b>${esc(label)}</b><span>${txt}</span>
+    <select data-ov="${d}|${key}" aria-label="${esc(label)}の天気を手で選ぶ">
       <option value="">自動</option>${['晴れ','くもり','雨'].map(k=>`<option ${ov===k?'selected':''}>${k}</option>`).join('')}
     </select></div>`;
 }
 function dayCard(d){
-  const date=dateOf(d),ids=S.plan?S.plan[d]:[];
+  const ids=dayIds(d),days=S.blockDays,r=rangeOf(d);
   const used=ids.reduce((s,id)=>s+load_(id),0),c=cap(d),over=used>c+0.5;
-  const doneN=ids.filter(id=>S.done[id]).length;
+  const doneN=ids.filter(id=>S.done[dk(d,id)]).length;
+  const hn=holName(d);
   let items='';
   if(S.plan){
-    const rows=times(d);
+    const rows=times(d),last=days.length>1&&d===lastDay();
+    const nextDay=days.length>1?days[(days.indexOf(d)+1)%days.length]:null;
     items=rows.length?'<ul>'+rows.map(r=>{
       if(r.lunch) return `<li class="lunch">${hm(r.s)}–${hm(r.e)}　昼休み</li>`;
-      const t=T(r.id),dn=!!S.done[r.id];
-      const late=d==='sun'&&t.want&&r.e>15*60?'<span class="tag warn">⚠夕方</span>':'';
+      if(r.gap) return `<li class="gap">${hm(r.s)}–${hm(r.e)}　空き時間（${jm(r.e-r.s)}）</li>`;
+      const t=T(r.id),key=dk(d,r.id),dn=!!S.done[key];
+      const late=last&&t.want&&r.e>15*60?'<span class="tag warn">⚠夕方</span>':'';
+      const clash=r.clash?'<span class="tag warn">⚠前の用事と重なっています</span>':'';
+      const overEnd=r.e>rangeOf(d).end?'<span class="tag warn">⚠時間帯を過ぎています</span>':'';
+      const rain=t.kind==='fixed'&&t.place!=='in'&&(wxInfo(d,t.place)||{}).kind==='雨'?'<span class="tag warn">☔雨の予報</span>':'';
+      const mv=isFree(t)?`<div class="mv"><button type="button" data-act="up" data-day="${d}" data-id="${r.id}">↑ 上へ</button><button type="button" data-act="down" data-day="${d}" data-id="${r.id}">↓ 下へ</button>
+        ${nextDay?`<button type="button" data-act="to" data-to="${nextDay}" data-id="${r.id}">${md(nextDay)}へ</button>`:''}<button type="button" data-act="later" data-id="${r.id}">あとで</button></div>`:'';
       return `<li class="item ${dn?'done':''}">
-        <button class="chk" data-act="done" data-id="${r.id}" aria-label="完了チェック">${dn?'✓':''}</button>
-        <div class="body"><div class="time">${hm(r.s)}–${hm(r.e)}（${jm(t.min)}）</div><div class="name">${esc(t.name)}</div>
-        <div class="tags">${tags(t)}${late}</div></div>
-        <div class="mv"><button data-act="up" data-day="${d}" data-id="${r.id}">↑ 上へ</button><button data-act="down" data-day="${d}" data-id="${r.id}">↓ 下へ</button>
-        <button data-act="${d==='sat'?'toSun':'toSat'}" data-id="${r.id}">${d==='sat'?'日曜へ':'土曜へ'}</button><button data-act="later" data-id="${r.id}">あとで</button></div></li>`;
+        <button type="button" class="chk" data-act="done" data-key="${key}" aria-label="${esc(t.name)}を完了にする" aria-pressed="${dn}">${dn?'✓':''}</button>
+        <div class="body"><div class="time">${hm(r.s)}–${hm(r.e)}（${jm(t.min)}）${t.noAlarm||!S.settings.alarm.on?'':' ⏰'}</div><div class="name">${esc(t.name)}</div>
+        <div class="tags">${tags(t)}${late}${clash}${overEnd}${rain}</div></div>${mv}</li>`;
     }).join('')+'</ul>':'<div class="empty">この日に入った用事はありません。</div>';
   }
-  const gauge=S.plan?`<div class="gauge ${over?'over':''}"><i style="width:${Math.min(100,used/c*100)}%"></i></div>
+  const pct=ids.length?Math.round(doneN/ids.length*100):0;
+  const bar=S.plan&&ids.length?`<div class="bar"><div class="track"><i style="width:${pct}%"></i></div><span>${doneN}/${ids.length} 完了</span></div>`:'';
+  const cheer=S.plan&&ids.length&&doneN===ids.length?'<p class="cheer">🎉 ぜんぶ完了！よくがんばりました🌿</p>':S.plan&&doneN>0?`<p class="cheer">${doneN}件完了。いい調子です！</p>`:'';
+  const gauge=S.plan?`<div class="gauge ${over?'over':''}"><i style="width:${c?Math.min(100,used/c*100):100}%"></i></div>
     <div class="gtext ${over?'over':''}">${over?'⚠ 詰め込みすぎです。1件、別の日か「あとで」にしましょう。　':''}予定 ${jm(used)} ／ 目安 ${jm(c)}（休憩つき）</div>`:'';
-  return `<div class="card"><div class="dayhead"><h2>${DAYNAME[d]} ${md(date)}</h2><span class="progress">${S.plan?`完了 ${doneN}/${ids.length}`:''}</span></div>
-    <div class="wx">${wxRow(d,'home','自宅')}${wxRow(d,'farm','農地')}</div>
+  const g=S.genki[d]||'ふつう';
+  return `<div class="card"><div class="dayhead"><h2>${dayLabel(d)}${d===today()?' 今日':''}</h2><span class="hint">${hm(r.start)}–${hm(r.end)}${hn?` <span class="tag hol">${esc(hn)}</span>`:''}</span></div>
+    ${bar}
+    <div class="wx">${wxRow(d,'home')}${wxRow(d,'farm')}</div>
     <div class="hint" style="margin-top:6px">朝の元気度</div>
-    <div class="seg">${['元気','ふつう','疲れ気味'].map(g=>`<button data-act="genki" data-day="${d}" data-v="${g}" class="${S.genki[d]===g?'on':''}">${g}</button>`).join('')}</div>
-    ${gauge}${items}</div>`;
+    <div class="seg">${['元気','ふつう','疲れ気味'].map(x=>`<button type="button" data-act="genki" data-day="${d}" data-v="${x}" class="${g===x?'on':''}">${x}</button>`).join('')}</div>
+    ${gauge}${items}${cheer}</div>`;
 }
 function onPlanClick(e){
   const b=e.target.closest('button[data-act]');if(!b)return;
   const act=b.dataset.act,id=b.dataset.id,d=b.dataset.day;
+  if(act==='news'){S.news=false;save();openWizard(2);return;}
+  if(act==='newsClose'){S.news=false;save();renderPlan();return;}
   if(act==='genki'){S.genki[d]=b.dataset.v;save();renderPlan();return;}
   if(!S.plan)return;
   const P=S.plan;
-  const remove=()=>['sat','sun','rest'].forEach(k=>{P[k]=P[k].filter(x=>x!==id);});
-  if(act==='done'){S.done[id]=!S.done[id];}
+  const remove=()=>{Object.keys(P.days).forEach(k=>{P.days[k]=P.days[k].filter(x=>x!==id);});P.rest=P.rest.filter(x=>x!==id);};
+  if(act==='done'){const k=b.dataset.key;S.done[k]=!S.done[k];const t=T(k.split('|')[1]);if(t&&S.done[k]&&isFree(t))t.carry=false;if(S.done[k]){save();renderPlan();cheerUp(k.split('|')[0],k.split('|')[1]);return;}}
   else if(act==='up'||act==='down'){
-    const a=P[d],i=a.indexOf(id),j=act==='up'?i-1:i+1;
+    const a=P.days[d],i=a.indexOf(id),j=act==='up'?i-1:i+1;
     if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];
   }
-  else if(act==='toSun'){remove();P.sun.push(id);}
-  else if(act==='toSat'){remove();P.sat.push(id);}
+  else if(act==='to'){remove();(P.days[b.dataset.to]=P.days[b.dataset.to]||[]).push(id);}
   else if(act==='later'){remove();P.rest.push(id);}
   save();renderPlan();
 }
 function onPlanChange(e){
-  const s=e.target.closest('select[data-ov]');if(!s)return;
-  const [d,k]=s.dataset.ov.split('.');S.ov[d][k]=s.value;save();renderPlan();
+  const s=e.target.closest('select[data-ov]');
+  if(s){const [d,k]=s.dataset.ov.split('|');S.ov[d]=S.ov[d]||{};S.ov[d][k]=s.value;save();renderPlan();return;}
+  const m=e.target.closest('select[data-moveto]');
+  if(m&&m.value&&S.plan){const id=m.dataset.moveto;S.plan.rest=S.plan.rest.filter(x=>x!==id);(S.plan.days[m.value]=S.plan.days[m.value]||[]).push(id);save();renderPlan();}
 }
 
 /* ---------- 画面：用事 ---------- */
 let editing=null;
 const F=$('taskForm');
+function fillFormOptions(){
+  const o=[];for(let m=300;m<=1380;m+=15)o.push(`<option value="${m}">${hm(m)}</option>`);$('f-at').innerHTML=o.join('');$('f-at').value='540';
+  const cats=CATS.concat(S.tasks.map(t=>t.cat).filter(c=>!CATS.includes(c)));
+  $('f-cat').innerHTML=[...new Set(cats)].map(c=>`<option>${esc(c)}</option>`).join('');
+  const pv=$('f-place').value||'in';
+  $('f-place').innerHTML=['in','home','farm'].map(k=>`<option value="${k}">${esc(placeName(k))}</option>`).join('');$('f-place').value=pv;
+}
+const kindVal=()=>(F.querySelector('input[name=kind]:checked')||{}).value||'free';
+function syncKind(){$('fixedRow').hidden=kindVal()!=='fixed';}
+F.querySelectorAll('input[name=kind]').forEach(r=>r.addEventListener('change',()=>{syncKind();if(kindVal()==='fixed'&&!F.date.value)F.date.value=S.blockDays[0]||today();}));
+function setKind(k){F.querySelectorAll('input[name=kind]').forEach(r=>{r.checked=r.value===k;});syncKind();}
 function resetForm(){
-  editing=null;F.reset();F.min.value='60';F.hard.value='普';
+  editing=null;F.reset();F.min.value='60';F.hard.value='普';F.at.value='540';F.date.value='';setKind('free');
   $('formTitle').textContent='用事を足す';$('saveBtn').textContent='足す';
   $('cancelBtn').hidden=true;$('delBtn').hidden=true;
 }
 function editTask(id){
   const t=T(id);if(!t)return;editing=id;
-  F.name.value=t.name;F.min.value=String(t.min);F.hard.value=t.hard;F.cat.value=t.cat;F.place.value=t.place;F.want.checked=t.want;
+  F.name.value=t.name;F.min.value=String(t.min);F.hard.value=t.hard;F.cat.value=t.cat;F.place.value=t.place;
+  F.want.checked=t.want;F.opt.checked=t.opt;F.noAlarm.checked=t.noAlarm;
+  setKind(t.kind);if(t.kind==='fixed'){F.date.value=t.date;F.at.value=String(t.at);}
   $('formTitle').textContent='用事を直す';$('saveBtn').textContent='保存';
   $('cancelBtn').hidden=false;$('delBtn').hidden=false;
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});F.name.focus();
+}
+function meta(t){
+  const k=t.kind==='fixed'?`${dayLabel(t.date)} ${hm(t.at)}固定・`:t.kind==='habit'?'毎朝の習慣・':'';
+  return `${k}${jm(t.min)}・${HARDNAME[t.hard]}・${esc(t.cat)}・${esc(placeName(t.place))}${t.want?'・★':''}${t.opt?'・できたら':''}${t.carry&&isFree(t)?'・持ち越し':''}${t.noAlarm?'・アラームなし':''}`;
 }
 function renderTasks(){
   $('taskList').innerHTML=S.tasks.length?S.tasks.map(t=>`<div class="trow ${t.on?'':'off'}">
-    <button class="sw ${t.on?'on':''}" data-sw="${t.id}">${t.on?'入れる':'休み'}</button>
-    <button class="tbody" data-edit="${t.id}"><div class="tname">${esc(t.name)}</div>
-    <div class="tmeta">${jm(t.min)}・${HARDNAME[t.hard]}・${esc(t.cat)}・${PLACENAME[t.place]}${t.want?'・★':''}</div></button></div>`).join('')
+    <button type="button" class="sw ${t.on?'on':''}" data-sw="${t.id}" aria-pressed="${t.on}">${t.on?'入れる':'休み'}</button>
+    <button type="button" class="tbody" data-edit="${t.id}"><div class="tname">${esc(t.name)}</div>
+    <div class="tmeta">${meta(t)}</div></button></div>`).join('')
     :'<div class="empty">用事がありません。上のフォームから足してください。</div>';
 }
 F.cat.addEventListener('change',()=>{if(F.cat.value==='農作業'&&F.place.value==='in')F.place.value='farm';});
 F.addEventListener('submit',e=>{
   e.preventDefault();
-  const name=F.name.value.trim();if(!name)return;
-  const t={id:editing||uid(),name:name,min:+F.min.value,cat:F.cat.value,hard:F.hard.value,place:F.place.value,want:F.want.checked,on:true};
-  if(editing){const i=S.tasks.findIndex(x=>x.id===editing);t.on=S.tasks[i].on;S.tasks[i]=t;}else S.tasks.push(t);
-  save();resetForm();renderTasks();renderPlan();
+  const name=F.name.value.trim();if(!name){F.name.focus();return;}
+  const kind=kindVal(),wasEdit=!!editing;
+  if(kind==='fixed'&&!F.date.value){toast('日にちを選んでください');F.date.focus();return;}
+  const t=fixTask({id:editing||uid(),name:name,min:+F.min.value,cat:F.cat.value,hard:F.hard.value,place:F.place.value,
+    want:F.want.checked,opt:F.opt.checked,noAlarm:F.noAlarm.checked,kind:kind,date:F.date.value,at:+F.at.value,on:true});
+  if(editing){const i=S.tasks.findIndex(x=>x.id===editing);t.on=S.tasks[i].on;t.carry=S.tasks[i].carry;S.tasks[i]=t;}else S.tasks.push(t);
+  save();resetForm();renderTasks();renderPlan();toast(wasEdit?'保存しました':'用事を足しました');
 });
 $('cancelBtn').addEventListener('click',resetForm);
-$('delBtn').addEventListener('click',()=>{
+$('delBtn').addEventListener('click',async()=>{
   const t=T(editing);if(!t)return;
-  if(!confirm(`「${t.name}」を削除します。よいですか？`))return;
-  S.tasks=S.tasks.filter(x=>x.id!==editing);delete S.done[editing];
-  save();resetForm();renderTasks();renderPlan();
+  if(!await ask(`「${t.name}」を削除しますか？`,'削除すると元に戻せません。','削除する'))return;
+  S.tasks=S.tasks.filter(x=>x.id!==editing);
+  save();resetForm();renderTasks();renderPlan();toast('削除しました');
 });
 $('taskList').addEventListener('click',e=>{
   const sw=e.target.closest('[data-sw]');
@@ -525,41 +935,336 @@ $('taskList').addEventListener('click',e=>{
   const ed=e.target.closest('[data-edit]');if(ed)editTask(ed.dataset.edit);
 });
 
-/* ---------- 画面：設定 ---------- */
-function fillSettings(){
-  const H=$('h-sat'),H2=$('h-sun');
-  const opts=[2,3,4,5,6,7,8,9,10,12].map(h=>`<option value="${h}">${h}時間</option>`).join('');
-  H.innerHTML=opts;H2.innerHTML=opts;
-  H.value=S.settings.hours.sat;H2.value=S.settings.hours.sun;
-  const st=[];for(let m=300;m<=600;m+=30)st.push(`<option value="${m}">${hm(m)}</option>`);
-  $('start').innerHTML=st.join('');$('start').value=S.settings.start;
-  ['home','farm'].forEach(k=>{
-    const p=S.settings.places[k];$('zip-'+k).value=p.zip||'';
-    $('res-'+k).className=p.lat!=null?'result ok':'result';
-    $('res-'+k).textContent=p.lat!=null?'✔ '+p.label:'';
-  });
+/* ---------- 設定の部品（ガイドと設定画面で共用） ---------- */
+const timeOpts=(from,to,sel)=>{const o=[];for(let m=from;m<=to;m+=30)o.push(`<option value="${m}" ${m===sel?'selected':''}>${hm(m)}</option>`);return o.join('');};
+function holidayHTML(p){
+  const st=S.settings;
+  return `<div class="hint">休みの日の決め方を選んでください。あとから「設定」でいつでも変えられます。</div>
+    ${RULES.map(([v,l])=>`<label class="checkline"><input type="radio" name="${p}-rule" data-s="rule" value="${v}" ${st.rule===v?'checked':''}><span>${l}</span></label>`).join('')}
+    <div ${st.rule==='weekdays'?'':'hidden'}><div class="hint">休みの曜日を押して選びます（いくつでも）</div>
+      <div class="wd">${WD.map((w,i)=>`<button type="button" data-wd="${i}" class="${st.weekdays.includes(i)?'on':''}" aria-pressed="${st.weekdays.includes(i)}">${w}</button>`).join('')}</div></div>
+    <div ${st.rule==='weekdays'||st.rule==='custom'?'':'hidden'}>
+      <h3>祝日の扱い</h3>
+      <label class="checkline"><input type="radio" name="${p}-hol" data-s="hol" value="1" ${st.holidayOff?'checked':''}><span>祝日も休み</span></label>
+      <label class="checkline"><input type="radio" name="${p}-hol" data-s="hol" value="0" ${st.holidayOff?'':'checked'}><span>祝日は休みにしない</span></label>
+    </div>
+    ${st.rule==='custom'?'<div class="hint">「休日カレンダー」で休みの日を押して選んでください。</div>':''}`;
 }
-$('h-sat').addEventListener('change',e=>{S.settings.hours.sat=+e.target.value;save();renderPlan();});
-$('h-sun').addEventListener('change',e=>{S.settings.hours.sun=+e.target.value;save();renderPlan();});
-$('start').addEventListener('change',e=>{S.settings.start=+e.target.value;save();renderPlan();});
+function timeHTML(){
+  const st=S.settings;
+  return `<div class="hint">休みの日に用事に使える時間帯です。この中で時間割をつくります。</div>
+    <div class="row2">
+      <label class="field"><span>はじめる時刻</span><select data-s="start">${timeOpts(240,720,st.start)}</select></label>
+      <label class="field"><span>終わる時刻</span><select data-s="end">${timeOpts(600,1380,st.end)}</select></label>
+    </div>
+    <label class="checkline"><input type="checkbox" data-s="lunch" ${st.lunch?'checked':''}><span>12時ごろに1時間の昼休みを入れる</span></label>
+    <div class="hint">月によって時間帯が違うときは、「休日カレンダー」でその月を開いて設定できます。</div>`;
+}
+let calMonth=today().slice(0,7);
+function calHTML(){
+  const [y,m]=calMonth.split('-').map(Number);
+  const first=new Date(y,m-1,1),days=new Date(y,m,0).getDate(),t=today();
+  let cells=WD.map((w,i)=>`<div class="dow ${i===0||i===6?'su':''}">${w}</div>`).join('');
+  for(let i=0;i<first.getDay();i++)cells+='<div></div>';
+  for(let d=1;d<=days;d++){
+    const s=`${y}-${pad(m)}-${pad(d)}`,on=isHoliday(s),hn=holName(s),ovr=S.settings.overrides[s];
+    cells+=`<button type="button" data-cal="${s}" class="${on?'on':''} ${ovr?'ovr':''} ${s<t?'past':''} ${s===t?'today':''}" aria-pressed="${on}" aria-label="${m}月${d}日 ${on?'休み':'休みでない'}${hn?' '+hn:''}">${d}${hn?`<small>${esc(hn.replace('の日',''))}</small>`:''}</button>`;
+  }
+  const mt=S.settings.monthTime[calMonth];
+  const cnt=Array.from({length:days},(_,i)=>`${y}-${pad(m)}-${pad(i+1)}`).filter(isHoliday).length;
+  return `<div class="calhead"><button type="button" class="btn" data-calnav="-1" aria-label="前の月">‹ 前</button><b>${y}年${m}月（休み${cnt}日）</b><button type="button" class="btn" data-calnav="1" aria-label="次の月">次 ›</button></div>
+    <div class="cal">${cells}</div>
+    <div class="legend"><span><i style="background:var(--main)"></i>休み</span><span><i style="background:var(--amber);border-radius:50%"></i>手で変えた日</span><span style="color:var(--hol)">赤い字＝祝日</span></div>
+    <h3>${m}月の時間帯</h3>
+    <label class="checkline"><input type="checkbox" data-mt="toggle" ${mt?'checked':''}><span>この月だけ時間帯を変える</span></label>
+    ${mt?`<div class="row2"><label class="field"><span>はじめる時刻</span><select data-mt="start">${timeOpts(240,720,mt.start)}</select></label>
+      <label class="field"><span>終わる時刻</span><select data-mt="end">${timeOpts(600,1380,mt.end)}</select></label></div>`:`<div class="hint">いつもの時間帯（${hm(S.settings.start)}–${hm(S.settings.end)}）を使います。</div>`}
+    ${Object.keys(S.settings.overrides).length?'<div class="btnrow"><button type="button" class="btn" data-calreset="1">手で変えた日をすべて元に戻す</button></div>':''}`;
+}
+function wxHTML(p){
+  return ['home','farm'].map(k=>{const pl=S.settings.places[k];return `<div class="place">
+    ${k==='home'?'<b>自宅</b><div class="hint">家まわりの作業（布団干し・庭など）の天気を見る場所です。</div>':
+      `<label class="field"><span>2つめの場所の名前（なくてもかまいません）</span><input type="text" data-pname="farm" value="${esc(pl.name)}" placeholder="例：畑・作業場・実家"></label>`}
+    <div class="zip"><input type="tel" inputmode="numeric" id="${p}-zip-${k}" value="${esc(pl.zip||'')}" placeholder="郵便番号 例：100-0001" aria-label="${k==='home'?'自宅':'2つめの場所'}の郵便番号"><button class="btn" type="button" data-lookup="${k}" data-p="${p}">調べる</button></div>
+    <div class="result ${pl.lat!=null?'ok':''}" id="${p}-res-${k}">${pl.lat!=null?'✔ '+esc(pl.label):''}</div></div>`;}).join('')+
+    '<div class="hint" style="margin-top:10px">郵便番号から住所を調べ、天気予報（無料のOpen-Meteo）を取ります。雨の日には外の作業を入れません。</div>';
+}
+function alarmHTML(){
+  const a=S.settings.alarm;
+  const perm=('Notification' in window)?Notification.permission:'unsupported';
+  return `<label class="checkline"><input type="checkbox" data-a="on" ${a.on?'checked':''}><span>予定の前にアラームで知らせる</span></label>
+    <div ${a.on?'':'hidden'}>
+    <div class="row2">
+      <label class="field"><span>何分前に</span><select data-a="lead">${[0,5,10,15,30,60].map(v=>`<option value="${v}" ${a.lead===v?'selected':''}>${v?v+'分前':'時間ちょうど'}</option>`).join('')}</select></label>
+      <label class="field"><span>アラームの種類</span><select data-a="type">
+        ${[['both','音＋通知'],['sound','音だけ'],['notice','通知だけ'],['screen','画面の表示だけ']].map(([v,l])=>`<option value="${v}" ${a.type===v?'selected':''}>${l}</option>`).join('')}</select></label>
+    </div>
+    <label class="field"><span>音の種類</span><select data-a="sound">
+      ${[['chime','チャイム（ピンポーン）'],['beep','ピピピ（目覚まし）'],['bell','ベル（やわらかい）']].map(([v,l])=>`<option value="${v}" ${a.sound===v?'selected':''}>${l}</option>`).join('')}</select></label>
+    <div class="btnrow"><button type="button" class="btn" data-a="test">ためしに鳴らす</button>${(a.type==='both'||a.type==='notice')&&perm==='default'?'<button type="button" class="btn main" data-a="perm">通知を許可する</button>':''}</div>
+    ${(a.type==='both'||a.type==='notice')&&perm==='denied'?'<div class="result ng">通知がブラウザで止められています。ブラウザの設定でこのページの通知を許可してください。音と画面表示は使えます。</div>':''}
+    ${(a.type==='both'||a.type==='notice')&&perm==='unsupported'?'<div class="result ng">このブラウザは通知に対応していません。音と画面表示で知らせます。</div>':''}
+    <div class="hint" style="margin-top:8px">アラームは、このアプリを開いている間だけ鳴ります（スマホは画面を消すと止まることがあります）。予定ごとに「アラームを鳴らさない」も選べます。</div>
+    </div>`;
+}
+function colorHTML(){
+  return `<div class="hint">ボタンや印の色を選べます。</div><div class="swatches">${Object.entries(COLORS).map(([k,c])=>
+    `<button type="button" data-color="${k}" class="${S.settings.color===k?'on':''}" aria-pressed="${S.settings.color===k}"><i style="background:${mq.matches?c.dark:c.light}"></i>${c.name}</button>`).join('')}</div>`;
+}
+function fontHTML(){
+  return `<div class="hint">アプリ全体の文字の雰囲気を選べます。</div><div class="fonts">${Object.entries(FONTS).map(([k,f])=>
+    `<button type="button" data-font="${k}" class="${S.settings.font===k?'on':''}" aria-pressed="${S.settings.font===k}" style="font-family:${esc(f.family)},sans-serif"><b>ゆるっと休日時間割　9:00 草取り</b><span>${f.name}｜${f.note}</span></button>`).join('')}</div>
+    <div class="hint">※ 書体はインターネットにつながっているときに読み込みます。つながっていないときは端末の標準の文字で表示します。</div>`;
+}
+function renderSettings(){
+  $('set-font').innerHTML=fontHTML();
+  $('set-holiday').innerHTML=holidayHTML('s');
+  $('set-cal').innerHTML=calHTML();
+  $('set-time').innerHTML=timeHTML();
+  $('set-wx').innerHTML=wxHTML('s');
+  $('set-alarm').innerHTML=alarmHTML();
+  $('set-color').innerHTML=colorHTML();
+}
+function afterSettings(){save();applyColor();rollBlock();renderSettings();renderSummary();renderPlan();if(!$('wizard').hidden)renderWizard();}
+function onSettingChange(e){
+  const el=e.target,st=S.settings;
+  if(el.dataset.s==='rule'){st.rule=el.value;}
+  else if(el.dataset.s==='hol'){st.holidayOff=el.value==='1';}
+  else if(el.dataset.s==='start'){st.start=+el.value;if(st.end<=st.start)st.end=Math.min(1380,st.start+120);}
+  else if(el.dataset.s==='end'){st.end=+el.value;if(st.end<=st.start)st.start=Math.max(240,st.end-120);}
+  else if(el.dataset.s==='lunch'){st.lunch=el.checked;}
+  else if(el.dataset.mt==='toggle'){if(el.checked)st.monthTime[calMonth]={start:st.start,end:st.end};else delete st.monthTime[calMonth];}
+  else if(el.dataset.mt==='start'||el.dataset.mt==='end'){const mt=st.monthTime[calMonth];mt[el.dataset.mt]=+el.value;if(mt.end<=mt.start){if(el.dataset.mt==='start')mt.end=Math.min(1380,mt.start+120);else mt.start=Math.max(240,mt.end-120);}}
+  else if(el.dataset.a==='on'){st.alarm.on=el.checked;if(el.checked)unlockAudio();}
+  else if(el.dataset.a==='lead'){st.alarm.lead=+el.value;S.fired={};}
+  else if(el.dataset.a==='type'){st.alarm.type=el.value;}
+  else if(el.dataset.a==='sound'){st.alarm.sound=el.value;unlockAudio();playSound(el.value);}
+  else if(el.dataset.pname){st.places.farm.name=el.value.trim()||'作業場';save();fillFormOptions();renderTasks();renderPlan();return;}
+  else return;
+  afterSettings();
+}
+function onSettingClick(e){
+  const b=e.target.closest('button');if(!b)return;
+  const st=S.settings;
+  if(b.dataset.wd!=null){const i=+b.dataset.wd;st.weekdays=st.weekdays.includes(i)?st.weekdays.filter(x=>x!==i):st.weekdays.concat(i).sort();afterSettings();}
+  else if(b.dataset.cal){const s=b.dataset.cal;if(st.overrides[s])delete st.overrides[s];else st.overrides[s]=baseHoliday(s)?'off':'on';afterSettings();}
+  else if(b.dataset.calnav){const [y,m]=calMonth.split('-').map(Number);const d=new Date(y,m-1+(+b.dataset.calnav),1);calMonth=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;renderSettings();if(!$('wizard').hidden)renderWizard();}
+  else if(b.dataset.calreset){st.overrides={};afterSettings();toast('元に戻しました');}
+  else if(b.dataset.color){st.color=b.dataset.color;afterSettings();}
+  else if(b.dataset.font){st.font=b.dataset.font;afterSettings();}
+  else if(b.dataset.lookup){const k=b.dataset.lookup,p=b.dataset.p;lookupZip(k,$(`${p}-zip-${k}`).value,$(`${p}-res-${k}`)).then(()=>{if(p==='s')renderSettings();});}
+  else if(b.dataset.a==='test'){unlockAudio();fireAlarm({name:'アラームのテスト',s:nowMin()+st.alarm.lead,test:true});}
+  else if(b.dataset.a==='perm'){if('Notification' in window)Notification.requestPermission().then(()=>afterSettings());}
+}
+['tab-set','wizard'].forEach(id=>{$(id).addEventListener('change',onSettingChange);$(id).addEventListener('click',onSettingClick);});
 $('wxRefresh').addEventListener('click',()=>refreshWx(true));
-document.querySelectorAll('[data-lookup]').forEach(b=>b.addEventListener('click',()=>lookupZip(b.dataset.lookup)));
+
+$('copyData').addEventListener('click',()=>{
+  const txt=JSON.stringify(S),ta=$('dataText');
+  const fallback=()=>{ta.value=txt;ta.focus();ta.select();toast('下の欄を選びました。コピーしてください');};
+  try{navigator.clipboard.writeText(txt).then(()=>toast('データをコピーしました'),fallback);}catch(e){fallback();}
+});
+$('loadData').addEventListener('click',async()=>{
+  let o=null;try{o=JSON.parse($('dataText').value);}catch(e){}
+  if(!o||!Array.isArray(o.tasks)){toast('読み込めませんでした。コピーしたデータを全部貼り付けてください');return;}
+  if(!await ask('今のデータを、貼り付けたデータに置きかえますか？','今入っている用事と設定は消えます。','置きかえる'))return;
+  S=upgrade(o);S.setup=true;S.blockKey='';save();$('dataText').value='';boot();toast('読み込みました');
+});
+$('resetAll').addEventListener('click',async()=>{
+  if(!await ask('リセットしますか？','用事・設定・時間割がすべて消え、最初の設定ガイドからやりなおします。','リセットする'))return;
+  S=fresh();save();boot();toast('リセットしました');
+});
+$('openGuide').addEventListener('click',()=>openWizard(1));
+$('openGuide2').addEventListener('click',()=>openWizard(1));
+$('resetAll2').addEventListener('click',()=>$('resetAll').click());
+function aboutHTML(){
+  return `<h2 id="aboutTitle">ゆるっと休日時間割とは</h2>
+  <p class="lead">休みの日の「やらなきゃ」と「やりたい」を、<b>その日の天気と元気に合わせて、ゆるく時間割にする</b>アプリです。</p>
+  <h3>できること</h3>
+  <ul>
+    <li><b>時間割を自動でつくる</b>：重い用事と軽い用事を交互に、休憩と昼休みも入れて並べます</li>
+    <li><b>天気を見る</b>：雨の日には外の作業を入れません</li>
+    <li><b>元気度で調整</b>：「疲れ気味」の日は用事を少なめにします</li>
+    <li><b>決まった予定・毎朝の習慣</b>も一緒に組み込みます</li>
+    <li><b>アラーム</b>で始まる前にお知らせ（アプリを開いている間）</li>
+  </ul>
+  <h3>使い方は3ステップ</h3>
+  <ol><li>「用事」に休みの日にやりたいことを入れる</li><li>「休日」で朝の元気度を選び、「時間割をつくる」を押す</li><li>終わったらチェック。終わらなかった用事は次の休みに持ち越し</li></ol>
+  <h3>データについて</h3>
+  <p class="hint" style="margin:0">入れた内容は、この端末のブラウザの中だけに保存されます。どこにも送られません（天気と住所を調べるときだけ、郵便番号と場所を天気サービスに問い合わせます）。</p>
+  <p class="hint">バージョン v${VERSION}</p>`;
+}
+function openAbout(){$('aboutBody').innerHTML=aboutHTML();$('aboutModal').hidden=false;$('aboutOk').focus();}
+$('aboutBtn').addEventListener('click',openAbout);
+$('aboutBtn2').addEventListener('click',openAbout);
+$('aboutOk').addEventListener('click',()=>{$('aboutModal').hidden=true;});
+function renderSummary(){
+  const st=S.settings,a=st.alarm,days=S.blockDays;
+  const rule=(RULES.find(r=>r[0]===st.rule)||['',''])[1]+(st.rule==='weekdays'?`：${st.weekdays.map(i=>WD[i]).join('・')||'なし'}`:'')+
+    (st.rule==='weekdays'||st.rule==='custom'?`（祝日${st.holidayOff?'も休み':'は休みにしない'}）`:'');
+  const ov=Object.keys(st.overrides).length,mt=Object.keys(st.monthTime).length;
+  const pl=['home','farm'].map(k=>st.places[k]).filter(p=>p.lat!=null).map(p=>`${p.name}：${p.label}`).join(' ／ ')||'未設定（手で選ぶ）';
+  const al=a.on?`${a.lead?a.lead+'分前':'時間ちょうど'}・${{both:'音＋通知',sound:'音だけ',notice:'通知だけ',screen:'画面の表示だけ'}[a.type]}・${{chime:'チャイム',beep:'ピピピ',bell:'ベル'}[a.sound]}`:'オフ';
+  const c=COLORS[st.color];
+  const rows=[
+    ['休日の決め方',rule+(ov?`／手で変えた日 ${ov}日`:'')],
+    ['次の休み',days.length?(days.length>1?`${dayLabel(days[0])}〜${dayLabel(days[days.length-1])}`:dayLabel(days[0])):'見つかりません'],
+    ['時間帯',`${hm(st.start)}–${hm(st.end)}${st.lunch?'（昼休みあり）':''}${mt?`／月ごとの指定 ${mt}か月`:''}`],
+    ['天気の場所',pl],
+    ['アラーム',al],
+    ['文字の書体',FONTS[st.font].name],
+    ['ボタンの色',`<i style="display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--main);vertical-align:-1px"></i> ${c.name}`],
+    ['用事',`${S.tasks.length}件（入れる ${S.tasks.filter(t=>t.on).length}件）`]
+  ];
+  $('setSummary').innerHTML=rows.map(([k,v])=>`<dt>${k}</dt><dd>${k==='ボタンの色'?v:esc(v)}</dd>`).join('');
+}
+$('verNo').textContent='v'+VERSION;
+$('changelog').innerHTML=CHANGELOG.map(r=>`<h3>v${r.v}（${r.d}）</h3><ul>${r.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`).join('');
+
+/* ---------- 初期設定ガイド ---------- */
+const STEPS=['はじめに','用事','休日','時間帯','天気','色・文字・アラーム'];
+let wizStep=0,picks=null;
+function openWizard(step){
+  wizStep=step||0;
+  if(!S.setup||!picks)picks=S.tasks.length?null:new Set();
+  $('wizard').hidden=false;renderWizard();$('wizard').scrollTop=0;
+}
+function renderWizard(){
+  $('wizSteps').innerHTML=STEPS.map((s,i)=>`<i class="${i<=wizStep?'on':''}" title="${s}"></i>`).join('');
+  let h='';
+  if(wizStep===0){
+    h=`<div class="hero">🌿</div><div class="card about">${aboutHTML()}</div><div class="hint">「次へ」で、5つのかんたんな質問に答えて設定します（2〜3分）。あとから「設定」でいつでも変えられます。</div>`;
+  }
+  else if(wizStep===1){
+    if(picks){
+      h=`<h2>よく使う用事をえらぶ</h2><div class="hint">よくある用事の見本です。使いたいものを選んでください（あとで足したり直したりできます）。</div>
+      <div class="card">${SAMPLES.map((s,i)=>`<label class="pick"><input type="checkbox" data-pick="${i}" ${picks.has(i)?'checked':''}><span><b>${esc(s.name)}</b><br><span class="tmeta">${jm(s.min)}・${HARDNAME[s.hard]}・${s.cat}${s.kind==='habit'?'・毎朝の習慣':''}${s.want?'・★やりたい':''}${s.opt?'・できたら':''}${s.place!=='in'?'・外の作業':''}</span></span></label>`).join('')}
+      <div class="btnrow"><button type="button" class="btn" data-pickall="1">全部えらぶ</button><button type="button" class="btn" data-pickall="0">全部はずす</button></div></div>
+      <div class="hint">${picks.size}件えらんでいます。</div>`;
+    }else{
+      h=`<h2>設定ガイド</h2><div class="hint">今の用事（${S.tasks.length}件）はそのまま残ります。「次へ」で休日・時間帯・天気・色とアラームを順に見直せます。</div>`;
+    }
+  }
+  else if(wizStep===2) h=`<h2>休日の決め方</h2><div class="card">${holidayHTML('w')}</div><div class="card"><h3 style="margin-top:0">休日カレンダー（確認・手直し）</h3>${calHTML()}</div>`;
+  else if(wizStep===3) h=`<h2>休日に使える時間帯</h2><div class="card">${timeHTML()}</div>`;
+  else if(wizStep===4) h=`<h2>天気を見る場所</h2><div class="card">${wxHTML('w')}</div><div class="hint">あとで入れる場合は「次へ」で進めます。天気は休日の画面で手でも選べます。</div>`;
+  else h=`<h2>色・文字・アラーム</h2><div class="card"><h3 style="margin-top:0">ボタンの色</h3>${colorHTML()}</div><div class="card"><h3 style="margin-top:0">文字の書体</h3>${fontHTML()}</div><div class="card"><h3 style="margin-top:0">アラーム</h3>${alarmHTML()}</div>`;
+  $('wizBody').innerHTML=h;
+  $('wizBack').textContent=wizStep===0&&S.setup?'閉じる':'もどる';
+  $('wizBack').disabled=wizStep===0&&!S.setup;
+  $('wizNext').textContent=wizStep===0&&!S.setup?'設定をはじめる':wizStep===STEPS.length-1?'使いはじめる':'次へ';
+}
+$('wizBody').addEventListener('change',e=>{const c=e.target.closest('[data-pick]');if(c){c.checked?picks.add(+c.dataset.pick):picks.delete(+c.dataset.pick);renderWizard();}});
+$('wizBody').addEventListener('click',e=>{const b=e.target.closest('[data-pickall]');if(b){picks=new Set(b.dataset.pickall==='1'?SAMPLES.map((_,i)=>i):[]);renderWizard();}});
+$('wizBack').addEventListener('click',()=>{if(wizStep===0){if(S.setup)$('wizard').hidden=true;return;}wizStep--;renderWizard();$('wizard').scrollTop=0;});
+$('wizNext').addEventListener('click',()=>{
+  if(wizStep===1&&picks&&!S.setup){
+    if(!picks.size){toast('1つ以上えらぶか、「全部えらぶ」を押してください');return;}
+  }
+  if(wizStep<STEPS.length-1){wizStep++;renderWizard();$('wizard').scrollTop=0;return;}
+  // 完了
+  if(picks&&picks.size){
+    const names=new Set(S.tasks.map(t=>t.name));
+    [...picks].sort((a,b)=>a-b).forEach(i=>{const s=SAMPLES[i];if(!names.has(s.name))S.tasks.push(fixTask(Object.assign({id:uid(),on:true},s)));});
+  }
+  picks=null;S.setup=true;S.news=false;save();$('wizard').hidden=true;
+  boot();showTab('plan');
+  praise('🎉','これで初期設定完了です！','おつかれさまでした。さっそく「時間割をつくる」を押して、次の休みをゆるっと組んでみましょう。','はじめる！');
+});
+
+/* ---------- ほめる ---------- */
+const PICK=a=>a[Math.floor(Math.random()*a.length)];
+const ONTIME=['予定どおり！すばらしい👏','時間ぴったり！いい流れです✨','計画どおりに進んでいます。さすが！','この調子！段取り上手ですね🌿','予定どおりクリア！かっこいい！'];
+const DONE=['おつかれさま！1つ片づきました👍','えらい！ちゃんと進んでいます','よくできました！ひと休みもどうぞ☕','できたね！その一歩が大きい','ナイス！気持ちがいいですね'];
+const HALF=['半分まで来ました！いいペースです🏃','折り返し地点！このままいきましょう'];
+function praise(icon,msg,sub,ok){
+  $('praiseIcon').textContent=icon;$('praiseMsg').textContent=msg;$('praiseSub').textContent=sub||'';$('praiseOk').textContent=ok||'やったね！';
+  $('praiseModal').hidden=false;$('praiseOk').focus();
+  if(navigator.vibrate)try{navigator.vibrate([30,40,30]);}catch(e){}
+}
+$('praiseOk').addEventListener('click',()=>{$('praiseModal').hidden=true;});
+function cheerUp(d,id){
+  const ids=dayIds(d),n=ids.filter(x=>S.done[dk(d,x)]).length;
+  if(n===ids.length){
+    const all=S.blockDays.every(x=>dayIds(x).every(y=>S.done[dk(x,y)]));
+    if(all&&S.blockDays.length>1)praise('🏆','休みの用事、ぜんぶ完了！','計画どおりにやりきりました。本当にすごい！のこりの時間は思いっきりゆるっとしましょう🌿');
+    else praise('🎉',`${dayLabel(d)}の予定、ぜんぶ完了！`,'最後までやりきりましたね。すばらしい！ゆっくり休んでください🌿');
+    return;
+  }
+  let onTime=false;
+  if(d===today()){const r=times(d).find(x=>x.id===id);if(r&&nowMin()<=r.e+15)onTime=true;}
+  if(n===Math.ceil(ids.length/2)&&ids.length>=4){toast(PICK(HALF));return;}
+  toast(onTime?PICK(ONTIME):PICK(DONE));
+}
+
+/* ---------- アラーム ---------- */
+let AC=null;
+function unlockAudio(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(C)AC=new C();}if(AC&&AC.state==='suspended')AC.resume();}catch(e){}}
+document.addEventListener('pointerdown',unlockAudio,{once:true});
+function tone(f,t0,dur,type,vol){
+  const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g).connect(AC.destination);o.start(t0);o.stop(t0+dur+0.05);
+}
+function playSound(kind){
+  if(!AC)return;const t=AC.currentTime+0.05;
+  if(kind==='beep'){for(let r=0;r<3;r++)for(let i=0;i<3;i++)tone(1760,t+r*0.9+i*0.16,0.1,'square',0.12);}
+  else if(kind==='bell'){[0,1.2].forEach(o=>{tone(880,t+o,1.1,'sine',0.3);tone(1320,t+o,0.8,'sine',0.12);});}
+  else{[0,1.4].forEach(o=>{tone(988,t+o,0.6,'sine',0.35);tone(784,t+o+0.45,0.9,'sine',0.35);});}
+}
+function fireAlarm(x){
+  const a=S.settings.alarm,lead=Math.max(0,x.s-nowMin());
+  const when=x.test?`${a.lead?a.lead+'分前に':'時間ちょうどに'}こう知らせます`:(lead>0?`あと${lead}分で始まります（${hm(x.s)}〜）`:`${hm(x.s)} になりました`);
+  if(a.type==='both'||a.type==='sound')playSound(a.sound);
+  if((a.type==='both'||a.type==='notice')&&'Notification' in window&&Notification.permission==='granted'){
+    try{new Notification('⏰ '+x.name,{body:when,tag:'hp-'+(x.key||'test')});}catch(e){}
+  }
+  if(navigator.vibrate&&a.type!=='screen')try{navigator.vibrate([300,150,300]);}catch(e){}
+  $('alarmName').textContent=x.name;$('alarmTime').textContent=when;$('alarmModal').hidden=false;$('alarmOk').focus();
+}
+$('alarmOk').addEventListener('click',()=>{$('alarmModal').hidden=true;});
+function checkAlarms(){
+  const a=S.settings.alarm;if(!a.on||!S.plan)return;
+  const d=today();if(!S.blockDays.includes(d))return;
+  const now=nowMin();
+  for(const r of times(d)){
+    if(!r.id)continue;const t=T(r.id),key=dk(d,r.id);
+    if(!t||t.noAlarm||S.done[key]||S.fired[key])continue;
+    if(now>=r.s-a.lead&&now<=r.s+5){S.fired[key]=1;save();fireAlarm({name:t.name,s:r.s,key:key});break;}
+  }
+}
+setInterval(checkAlarms,15000);
 
 /* ---------- 共通 ---------- */
-$('gen').addEventListener('click',()=>{
-  if(S.plan&&!confirm('今の並びを作りなおします。手で直した内容は消えます。よいですか？'))return;
-  generate();
+$('gen').addEventListener('click',async()=>{
+  if(S.plan&&!await ask('時間割を作りなおしますか？','手で並べかえた内容は消えます。チェックはそのまま残ります。','作りなおす'))return;
+  generate();toast('時間割をつくりました');
 });
 $('days').addEventListener('click',onPlanClick);
+$('notice').addEventListener('click',onPlanClick);
 $('rest').addEventListener('click',onPlanClick);
 $('days').addEventListener('change',onPlanChange);
-document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
-  ['plan','tasks','set'].forEach(t=>{$('tab-'+t).hidden=(t!==b.dataset.tab);});
+$('rest').addEventListener('change',onPlanChange);
+// ボタンを押した瞬間にふくらませる
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;b.classList.add('pop');
+  const off=()=>{b.classList.remove('pop');['pointerup','pointercancel','pointerleave'].forEach(t=>b.removeEventListener(t,off));};
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,off));
+  if(navigator.vibrate)try{navigator.vibrate(8);}catch(_){} });
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.tagName==='BUTTON'){const b=e.target;b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),140);}});
+function showTab(tab){
+  if(tab==='set')renderSummary();
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
+  ['plan','tasks','set'].forEach(t=>{$('tab-'+t).hidden=(t!==tab);});
   window.scrollTo(0,0);
-}));
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){rollBlock();renderPlan();checkAlarms();}});
 
-rollWeek();fillSettings();renderTasks();renderPlan();
+function boot(){
+  applyColor();rollBlock();fillFormOptions();resetForm();renderTasks();renderSettings();renderSummary();renderPlan();
+  if(!S.setup)openWizard(0);
+}
+boot();
 if(Date.now()-S.wxAt>3*3600*1000) refreshWx(false);
 })();
 </script>
